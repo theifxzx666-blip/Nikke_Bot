@@ -75,8 +75,31 @@ class WikiIndex:
                     if key and key not in self.by_alias:
                         self.by_alias[key] = str(formal)
 
+        # 合并机器人侧补充别名（不修改 Nikke_Wiki，避免被 Codex 更新覆盖）
+        extra = self._load_extra_aliases()
+        if extra:
+            for formal, alias_list in extra.items():
+                if not isinstance(alias_list, list):
+                    continue
+                for alias in alias_list:
+                    key = str(alias).strip()
+                    if key and key not in self.by_alias:
+                        self.by_alias[key] = str(formal)
+
         logger.info("WikiIndex 加载完成: %d 角色, %d 别名", len(self.characters), len(self.by_alias))
         return True
+
+    def _load_extra_aliases(self) -> dict[str, list[str]]:
+        """加载机器人侧补充别名表 data/character_aliases_extra.json。"""
+        extra_path = Path(__file__).resolve().parents[2] / "data" / "character_aliases_extra.json"
+        try:
+            if extra_path.exists():
+                data = _load_json(extra_path)
+                if isinstance(data, dict):
+                    return data
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("补充别名表加载失败: %s", exc)
+        return {}
 
     def lookup(self, query: str) -> dict[str, Any] | None:
         """按 英文名 / 中文名 / 别名 顺序精确查找，返回角色记录或 None。"""
