@@ -55,3 +55,6 @@ data/bridge_*.log
 data/reload*.txt
 data/_llm_probe*.json
 data/_ollama_probe*.json
+data/astrbot_restart.txt
+data/astrbot_start.txt
+data/plugin_reload.txt
