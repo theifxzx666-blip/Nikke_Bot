@@ -63,13 +63,23 @@ class BridgeOutbox:
             ),
         )
 
-    def read_after(self, session_id: str, after: int = 0) -> list[OutboxMessage]:
+    def read_after(self, session_id: str, after: int = 0, consume: bool = True) -> list[OutboxMessage]:
+        """读取指定游标之后的消息。
+
+        consume=True（默认）时，读取后立即从队列移除，避免历史图片被后续轮询重复发送。
+        返回的消息 id 会推进游标；被消费的消息不会再次返回。
+        """
         with self.lock:
-            return [
-                message
-                for message in self.messages.get(session_id, [])
-                if message.id > after
-            ]
+            bucket = self.messages.get(session_id, [])
+            result = [message for message in bucket if message.id > after]
+            if consume and result:
+                max_id = result[-1].id
+                remaining = [message for message in bucket if message.id > max_id]
+                if remaining:
+                    self.messages[session_id] = remaining
+                else:
+                    self.messages.pop(session_id, None)
+            return result
 
     def _append(self, session_id: str, message: OutboxMessage) -> None:
         with self.lock:

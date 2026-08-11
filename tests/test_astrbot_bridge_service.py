@@ -96,5 +96,33 @@ class AstrBotBridgeServiceTests(unittest.TestCase):
         bot.handle_message.assert_not_called()
 
 
+    def test_bridge_outbox_consumes_after_read(self) -> None:
+        """读到即删：第二次读取不应再返回同一批消息，避免历史图片重复发送。"""
+        outbox = BridgeOutbox()
+        outbox.append_text("s3", "第一条")
+        outbox.append_image("s3", Path("C:/tmp/a.png"), "图片A")
+        first = outbox.read_after("s3", after=0)
+        self.assertEqual(len(first), 2)
+
+        # 消费后再次读取：应返回空（消息已被移除）
+        second = outbox.read_after("s3", after=0)
+        self.assertEqual(second, [])
+
+        # 新追加的消息仍可读到
+        outbox.append_text("s3", "第二条")
+        third = outbox.read_after("s3", after=0)
+        self.assertEqual(len(third), 1)
+        self.assertEqual(third[0].text, "第二条")
+
+    def test_bridge_outbox_consume_false_keeps_messages(self) -> None:
+        """consume=False 时保留消息（供一次性读取场景）。"""
+        outbox = BridgeOutbox()
+        outbox.append_text("s4", "保留")
+        first = outbox.read_after("s4", after=0, consume=False)
+        self.assertEqual(len(first), 1)
+        second = outbox.read_after("s4", after=0, consume=False)
+        self.assertEqual(len(second), 1)
+
+
 if __name__ == "__main__":
     unittest.main()
