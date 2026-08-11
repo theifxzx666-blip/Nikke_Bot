@@ -174,11 +174,22 @@ def fetch_skills_from_dictionary(rec: dict[str, Any]) -> dict[str, dict[str, str
 
 
 def resolve_skills(rec: dict[str, Any]) -> dict[str, dict[str, str]] | None:
-    """获取角色技能组：优先词典内置，effect 缺失时用内容缓存补齐。
+    """获取角色技能组。
 
-    词典 skills 字段（Codex 维护，覆盖 189/191 角色）提供名称/类型/冷却；
-    内容缓存（533 条技能）提供 lv1 效果文本。
+    优先级：
+      1. 角色有珍藏品（favoriteItem.status=已确认）且内容缓存可解析 → 用缓存
+         （缓存含 lv10 珍藏品强化效果，词典只存 lv1 效果）
+      2. 否则用词典内置 skills，effect 缺失时回退缓存补齐。
     """
+    has_treasure = (
+        isinstance(rec.get("favoriteItem"), dict)
+        and rec.get("favoriteItem", {}).get("status") == "已确认"
+    )
+    if has_treasure:
+        cached = fetch_skills(rec.get("gamekeeContentId"))
+        if cached:
+            return cached
+
     base = fetch_skills_from_dictionary(rec)
     if base is None:
         return fetch_skills(rec.get("gamekeeContentId"))
@@ -198,6 +209,54 @@ def resolve_skills(rec: dict[str, Any]) -> dict[str, dict[str, str]] | None:
     return base
 
 
+def fetch_favorite_item(rec: dict[str, Any]) -> dict[str, str] | None:
+    """从角色记录/内容缓存提取珍藏品基本信息（名称/稀有度/简介）。
+
+    返回 {"name": ..., "rarity": ..., "desc": ...}；无珍藏品返回 None。
+    """
+    fav = rec.get("favoriteItem")
+    if isinstance(fav, dict) and fav.get("status") == "已确认":
+        name = str(fav.get("itemName") or "").strip()
+        if name and name != "珍藏品（名称待确认）":
+            return {
+                "name": name,
+                "rarity": str(fav.get("rarity") or "").strip(),
+                "desc": str(fav.get("desc") or "").strip(),
+            }
+
+    # 从内容缓存补全（珍藏品名称/稀有度/简介）
+    rows = _load_content_rows(rec.get("gamekeeContentId"))
+    if rows is None:
+        return None
+    name = rarity = desc = ""
+    for row in rows:
+        cells = _row_values(row)
+        if not cells:
+            continue
+        label, value = cells[0], (cells[1] if len(cells) > 1 else "")
+        if label == "珍藏品名称" and value:
+            name = value
+        elif label == "珍藏品稀有度" and value and not rarity:
+            rarity = value
+        elif label == "珍藏品简介" and value and not desc:
+            desc = value
+    if not name:
+        return None
+    return {"name": name, "rarity": rarity, "desc": desc}
+
+
+def format_favorite_text(item: dict[str, str]) -> str:
+    """把珍藏品信息格式化为可读文本。"""
+    if not item:
+        return ""
+    lines = [f"珍藏品：{item.get('name', '')}"]
+    if item.get("rarity"):
+        lines.append(f"稀有度：{item['rarity']}")
+    if item.get("desc"):
+        lines.append(f"简介：{item['desc']}")
+    return "\n".join(lines)
+
+
 def format_skills_text(skills: dict[str, dict[str, str]]) -> str:
     """把技能组格式化为角色卡可读文本（技能块间空行分隔，描述完整展示）。"""
     if not skills:
@@ -214,10 +273,16 @@ def format_skills_text(skills: dict[str, dict[str, str]]) -> str:
         if block.get("cooldown"):
             parts.append(f"冷却{block['cooldown']}")
         block_lines = [" ".join(parts)]
-        desc = block.get("desc") or block.get("desc_lv10") or ""
+        desc = block.get("desc") or ""
+        desc_lv10 = block.get("desc_lv10") or ""
         if desc:
             # 描述完整展示：保留所有行，统一用「　」前缀
             desc_lines = [ln.strip() for ln in desc.splitlines() if ln.strip()]
             block_lines.extend(f"　{ln}" for ln in desc_lines)
+        if desc_lv10 and desc_lv10 != desc:
+            # 珍藏品强化效果（lv10）——仅在存在且与普通描述不同时展示
+            block_lines.append("　【珍藏品强化】")
+            lv10_lines = [ln.strip() for ln in desc_lv10.splitlines() if ln.strip()]
+            block_lines.extend(f"　{ln}" for ln in lv10_lines)
         blocks.append("\n".join(block_lines))
     return "\n\n".join(blocks) if blocks else "技能资料暂未收录"

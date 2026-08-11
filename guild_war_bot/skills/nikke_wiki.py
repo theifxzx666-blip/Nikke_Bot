@@ -14,7 +14,7 @@ from guild_war_bot.core import normalize_command
 
 from ..wiki_query import WikiIndex, default_index, normalize_query, resolve_skills, summarize_character
 from ..wiki_query.normalizer import extract_after_keyword
-from ..wiki_query.skills import format_skills_text
+from ..wiki_query.skills import fetch_favorite_item, format_favorite_text, format_skills_text
 from ..wiki_query.summarize import character_portrait_path, not_found_text
 from .base import IncomingMessage, SkillContext
 
@@ -76,8 +76,12 @@ class NikkeWikiSkill:
         return self._reply_with_portrait(rec, context)
 
     def _reply_with_portrait(self, rec: dict, context: SkillContext) -> str:
-        """返回角色卡文本（含技能组），并尝试发送本地立绘。"""
+        """返回角色卡文本（含技能组与珍藏品），并尝试发送本地立绘。"""
         parts = [summarize_character(self._get_index(), rec)]
+        fav = fetch_favorite_item(rec)
+        if fav:
+            parts.append("")
+            parts.append(format_favorite_text(fav))
         skills = resolve_skills(rec)
         if skills:
             parts.append("")
