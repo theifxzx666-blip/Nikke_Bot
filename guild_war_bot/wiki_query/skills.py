@@ -199,10 +199,10 @@ def resolve_skills(rec: dict[str, Any]) -> dict[str, dict[str, str]] | None:
 
 
 def format_skills_text(skills: dict[str, dict[str, str]]) -> str:
-    """把技能组格式化为角色卡可读文本。"""
+    """把技能组格式化为角色卡可读文本（技能块间空行分隔，描述完整展示）。"""
     if not skills:
         return "技能资料暂未收录"
-    lines = []
+    blocks: list[str] = []
     for label in ("技能1", "技能2", "爆裂技能"):
         block = skills.get(label)
         if not block:
@@ -213,10 +213,11 @@ def format_skills_text(skills: dict[str, dict[str, str]]) -> str:
             parts.append(block["type"])
         if block.get("cooldown"):
             parts.append(f"冷却{block['cooldown']}")
-        lines.append(" ".join(parts))
+        block_lines = [" ".join(parts)]
         desc = block.get("desc") or block.get("desc_lv10") or ""
         if desc:
-            # 技能描述可能很长，只展示前 2 行
+            # 描述完整展示：保留所有行，统一用「　」前缀
             desc_lines = [ln.strip() for ln in desc.splitlines() if ln.strip()]
-            lines.append("　" + " ".join(desc_lines[:2])[:120])
-    return "\n".join(lines) if lines else "技能资料暂未收录"
+            block_lines.extend(f"　{ln}" for ln in desc_lines)
+        blocks.append("\n".join(block_lines))
+    return "\n\n".join(blocks) if blocks else "技能资料暂未收录"
