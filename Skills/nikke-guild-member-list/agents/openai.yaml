@@ -1,0 +1,6 @@
+interface:
+  display_name: "成员名单"
+  short_description: "维护成员名单、QQ 绑定、群名片和启用状态。"
+  default_prompt: "Use $nikke-guild-member-list to maintain member list queries and related database fields."
+policy:
+  allow_implicit_invocation: true

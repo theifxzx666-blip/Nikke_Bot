@@ -1,0 +1,59 @@
+{
+  "bridge": {
+    "description": "本地会战桥接服务",
+    "type": "object",
+    "items": {
+      "bridge_url": {
+        "description": "桥接服务地址",
+        "type": "string",
+        "default": "http://127.0.0.1:8793",
+        "hint": "对应 Nikke_Bot 本地桥接服务。日常本机部署保持默认即可。"
+      },
+      "request_timeout_seconds": {
+        "description": "请求超时秒数",
+        "type": "int",
+        "default": 10,
+        "hint": "桥接服务无响应时等待多久再返回错误。",
+        "slider": {
+          "min": 1,
+          "max": 60,
+          "step": 1
+        }
+      },
+      "outbox_poll_interval_seconds": {
+        "description": "图片/异步回复轮询间隔",
+        "type": "int",
+        "default": 2,
+        "hint": "用于 /会战进度查询 这类需要稍后返回图片的命令。",
+        "slider": {
+          "min": 1,
+          "max": 10,
+          "step": 1
+        }
+      },
+      "outbox_poll_attempts": {
+        "description": "图片/异步回复最大轮询次数",
+        "type": "int",
+        "default": 60,
+        "hint": "默认 60 次 x 2 秒，最多等待约 2 分钟。",
+        "slider": {
+          "min": 1,
+          "max": 180,
+          "step": 1
+        }
+      }
+    }
+  },
+  "permissions": {
+    "description": "权限配置",
+    "type": "object",
+    "items": {
+      "admin_qq_ids": {
+        "description": "管理员 QQ 号列表",
+        "type": "list",
+        "default": [],
+        "hint": "用于 /重置今日、/代出刀、/改伤害 等管理命令。每个 QQ 号单独一项。"
+      }
+    }
+  }
+}

@@ -1,0 +1,52 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# ===== 运行时依赖（本机部署，不提交）=====
+supports/
+
+# ===== 数据（业务运行时产生，不提交）=====
+data/*.db
+data/*.db-shm
+data/*.db-wal
+data/*.log
+data/backup/
+data/exports/
+data/templates/
+data/tessdata/
+data/logs/
+data/_sizes.txt
+
+# ===== 配置文件（含本机敏感信息，不提交）=====
+data/*.config.json
+data/*.config.before_click_restore.json
+data/flow1_name_aliases.json
+
+# ===== NapCat / 桥接运行时配置（含 token，不提交）=====
+**/napcat_*.json
+**/onebot11_*.json
+**/webui.json
+**/passkey.json
+
+# ===== 操作系统 =====
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# ===== IDE =====
+.idea/
+.vscode/
+*.swp
+
+# ===== 其他 =====
+*.log
+
+# ===== 临时诊断文件（勿提交）=====
+data/*.tmp
+data/napcat_*.txt
+data/qq48904.txt
+data/_*.txt

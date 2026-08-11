@@ -1,0 +1,6 @@
+interface:
+  display_name: "会战提醒"
+  short_description: "维护未出满提醒、零刀催刀和提醒边界。"
+  default_prompt: "Use $nikke-guild-reminder to maintain guild raid reminder commands."
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,6 @@
+interface:
+  display_name: "AstrBot 桥接"
+  short_description: "维护 AstrBot 插件、本地 HTTP 桥和异步 outbox。"
+  default_prompt: "Use $nikke-astrbot-bridge to maintain the AstrBot bridge plugin and local HTTP command flow."
+policy:
+  allow_implicit_invocation: true

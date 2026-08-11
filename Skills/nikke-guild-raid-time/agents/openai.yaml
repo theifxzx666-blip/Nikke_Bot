@@ -1,0 +1,6 @@
+interface:
+  display_name: "会战时间"
+  short_description: "维护联盟突袭时间、结算期、切日和催刀周期。"
+  default_prompt: "Use $nikke-guild-raid-time to maintain raid schedule and battle-day logic."
+policy:
+  allow_implicit_invocation: true

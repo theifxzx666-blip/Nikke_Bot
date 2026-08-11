@@ -1,0 +1,10 @@
+# Local runtime dependencies for this Nikke workspace.
+# Install with: py -m pip install -r requirements-local.txt
+
+numpy
+openpyxl
+Pillow
+pyautogui
+pydirectinput
+pywin32; platform_system == "Windows"
+pytest

@@ -1,0 +1,6 @@
+interface:
+  display_name: "出刀记录"
+  short_description: "维护出刀记录、伤害解析、代出刀和改伤害。"
+  default_prompt: "Use $nikke-guild-attack-record to maintain attack recording and damage correction commands."
+policy:
+  allow_implicit_invocation: true

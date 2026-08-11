@@ -1,0 +1,6 @@
+interface:
+  display_name: "NIKKE 指令菜单"
+  short_description: "维护机器人帮助菜单、命令清单和别名同步。"
+  default_prompt: "Use $nikke-bot-help-menu to update the NIKKE QQ bot help menu and command inventory."
+policy:
+  allow_implicit_invocation: true
