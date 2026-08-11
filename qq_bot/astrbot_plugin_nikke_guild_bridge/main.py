@@ -185,7 +185,20 @@ class NikkeGuildBridgePlugin(Star):
 
     def _may_have_async_outputs(self, text: str, reply: Any) -> bool:
         normalized = text.lstrip("/／").strip()
-        if normalized.startswith(("会战进度查询", "会战进度", "联盟突袭进度查询")):
+        # 会发图的命令：会战进度截图、角色卡立绘、wiki 查询等
+        if normalized.startswith(
+            (
+                "会战进度查询",
+                "会战进度",
+                "联盟突袭进度查询",
+                "角色",
+                "查角色",
+                "角色卡",
+                "是谁",
+                "wiki",
+                "查 ",
+            )
+        ):
             return True
         return "正在" in str(reply or "") and "完成后" in str(reply or "")
 
