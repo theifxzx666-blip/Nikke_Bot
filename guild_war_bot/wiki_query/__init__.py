@@ -7,6 +7,7 @@
 
 from .index import WikiIndex, default_index
 from .normalizer import normalize_query
+from .skills import resolve_skills
 from .summarize import summarize_character
 
-__all__ = ["WikiIndex", "default_index", "normalize_query", "summarize_character"]
+__all__ = ["WikiIndex", "default_index", "normalize_query", "summarize_character", "resolve_skills"]

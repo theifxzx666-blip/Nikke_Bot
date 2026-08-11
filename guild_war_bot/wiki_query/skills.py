@@ -142,6 +142,62 @@ def fetch_skills(content_id: int | None) -> dict[str, dict[str, str]] | None:
     return result or None
 
 
+def fetch_skills_from_dictionary(rec: dict[str, Any]) -> dict[str, dict[str, str]] | None:
+    """从增强词典的 skills 字段提取技能组（Codex 已内置）。
+
+    返回 {"技能1": {...}, "技能2": {...}, "爆裂技能": {...}}；字段缺失返回 None。
+    effect 为 "待确认" 时保留空串，由调用方决定是否回退缓存解析。
+    """
+    raw = rec.get("skills")
+    if not isinstance(raw, dict):
+        return None
+    mapping = {"skill1": "技能1", "skill2": "技能2", "burstSkill": "爆裂技能"}
+    result: dict[str, dict[str, str]] = {}
+    for key, label in mapping.items():
+        block = raw.get(key)
+        if not isinstance(block, dict):
+            continue
+        name = str(block.get("name") or "").strip()
+        if not name:
+            continue
+        effect = str(block.get("effect") or "").strip()
+        if effect == "待确认":
+            effect = ""
+        result[label] = {
+            "name": name,
+            "type": str(block.get("type") or "").strip(),
+            "cooldown": str(block.get("cooldown") or "").strip(),
+            "desc": effect,
+            "desc_lv10": "",
+        }
+    return result or None
+
+
+def resolve_skills(rec: dict[str, Any]) -> dict[str, dict[str, str]] | None:
+    """获取角色技能组：优先词典内置，effect 缺失时用内容缓存补齐。
+
+    词典 skills 字段（Codex 维护，覆盖 189/191 角色）提供名称/类型/冷却；
+    内容缓存（533 条技能）提供 lv1 效果文本。
+    """
+    base = fetch_skills_from_dictionary(rec)
+    if base is None:
+        return fetch_skills(rec.get("gamekeeContentId"))
+
+    # 检查是否有 effect 待确认的技能块
+    needs_cache = any(not block.get("desc") for block in base.values())
+    if not needs_cache:
+        return base
+
+    cached = fetch_skills(rec.get("gamekeeContentId")) or {}
+    for label, block in base.items():
+        if block.get("desc"):
+            continue
+        cached_block = cached.get(label)
+        if cached_block and cached_block.get("desc"):
+            block["desc"] = cached_block["desc"]
+    return base
+
+
 def format_skills_text(skills: dict[str, dict[str, str]]) -> str:
     """把技能组格式化为角色卡可读文本。"""
     if not skills:
