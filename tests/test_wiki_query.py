@@ -113,3 +113,25 @@ class TestNikkeWikiSkill:
         result = skill.handle(msg, SkillContext(bot=None, reply=None))  # type: ignore[arg-type]
         assert result is not None
         assert "没查到" in result
+
+
+class TestSkillFetch:
+    """技能组解析测试（依赖 GameKee 内容缓存）。"""
+
+    def test_fetch_skills_red_lotus(self):
+        from guild_war_bot.wiki_query.skills import fetch_skills, format_skills_text
+
+        # 红莲 gamekeeContentId=152335，缓存应存在
+        skills = fetch_skills(152335)
+        assert skills is not None
+        assert "技能1" in skills and "爆裂技能" in skills
+        assert skills["技能1"]["name"]
+        text = format_skills_text(skills)
+        assert "技能1：" in text
+
+    def test_fetch_skills_missing_cache(self):
+        from guild_war_bot.wiki_query.skills import fetch_skills
+
+        # 不存在的 contentId 返回 None，不抛异常
+        assert fetch_skills(999999999) is None
+        assert fetch_skills(None) is None
