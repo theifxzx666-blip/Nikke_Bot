@@ -50,3 +50,5 @@ data/*.tmp
 data/napcat_*.txt
 data/qq48904.txt
 data/_*.txt
+data/bridge_*.txt
+data/bridge_*.log
