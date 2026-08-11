@@ -17,6 +17,7 @@
 | `nikke-guild-member-list` | `/成员`、`/名单` | `GuildWarMemberListSkill` |
 | `nikke-guild-raid-time` | `/会战时间`、`/突袭时间`、`/活动时间` | `GuildWarRaidTimeSkill` |
 | `nikke-guild-progress-capture` | `/会战进度查询`、`/会战进度`、`/联盟突袭进度查询` | `guild_war_bot/skills/game_progress.py` |
+| `nikke-wiki-query` | `/角色 <名>`、`/wiki <词>`（P1 本地角色卡） | `guild_war_bot/skills/nikke_wiki.py`、`guild_war_bot/wiki_query/` |
 | `nikke-astrbot-bridge` | AstrBot 插件命令转发、outbox 图片回传 | `qq_bot/astrbot_plugin_nikke_guild_bridge/main.py`、`guild_war_bot/service_http.py` |
 
 ## 维护顺序

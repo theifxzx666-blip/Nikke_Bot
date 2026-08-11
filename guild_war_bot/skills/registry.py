@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from .base import BotSkill, IncomingMessage, SkillContext
 from .game_progress import GameProgressSkill
 from .guild_war import guild_war_skills
+from .nikke_wiki import NikkeWikiSkill
 
 
 @dataclass(frozen=True)
@@ -31,5 +32,6 @@ def default_registry() -> SkillRegistry:
         [
             GameProgressSkill(),
             *guild_war_skills(),
+            NikkeWikiSkill(),
         ]
     )
