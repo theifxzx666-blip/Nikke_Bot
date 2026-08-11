@@ -1,0 +1,4 @@
+﻿STOP astrbot PID=39940
+STOP astrbot PID=44920
+6185 FREE
+done
