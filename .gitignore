@@ -53,3 +53,5 @@ data/_*.txt
 data/bridge_*.txt
 data/bridge_*.log
 data/reload*.txt
+data/_llm_probe*.json
+data/_ollama_probe*.json
