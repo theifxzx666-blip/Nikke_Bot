@@ -72,3 +72,4 @@ data/sync_test.txt
 data/taskkill.txt
 data/win_check.txt
 data/skill_test_result.txt
+data/_check_*.py
