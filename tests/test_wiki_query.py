@@ -135,3 +135,35 @@ class TestSkillFetch:
         # 不存在的 contentId 返回 None，不抛异常
         assert fetch_skills(999999999) is None
         assert fetch_skills(None) is None
+
+
+class TestOnlineFallback:
+    """P2 在线兜底测试（依赖 GameKee 网络，可跳过）。"""
+
+    def test_search_role_online(self):
+        from guild_war_bot.wiki_query.online import search_role
+
+        role = search_role("红莲")
+        if role is None:
+            import pytest
+            pytest.skip("GameKee 网络不可用")
+        assert role.get("content_id")
+
+    def test_online_skill_fallback(self):
+        from guild_war_bot.wiki_query.skills import fetch_skills_online
+
+        skills = fetch_skills_online(713891)  # 拉普拉斯：究极英雄
+        if skills is None:
+            import pytest
+            pytest.skip("GameKee 网络不可用")
+        assert "技能1" in skills
+
+    def test_search_role_with_colon(self):
+        from guild_war_bot.wiki_query.online import search_role
+
+        # 冒号被 normalize 去掉后仍能在线匹配
+        role = search_role("拉普拉斯究极英雄")
+        if role is None:
+            import pytest
+            pytest.skip("GameKee 网络不可用")
+        assert "究极英雄" in str(role.get("name"))

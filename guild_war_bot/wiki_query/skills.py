@@ -118,14 +118,8 @@ def _skill_block_ranges(rows: list[list[dict[str, Any]]]) -> dict[str, tuple[int
     return blocks
 
 
-def fetch_skills(content_id: int | None) -> dict[str, dict[str, str]] | None:
-    """按 gamekeeContentId 提取技能组。
-
-    返回 {"技能1": {...}, "技能2": {...}, "爆裂技能": {...}}；缓存缺失返回 None。
-    """
-    rows = _load_content_rows(content_id)
-    if rows is None:
-        return None
+def _rows_to_skills(rows: list[list[dict[str, Any]]]) -> dict[str, dict[str, str]] | None:
+    """从 baseData 行列表解析技能组（本地缓存与在线数据共用）。"""
     ranges = _skill_block_ranges(rows)
     result: dict[str, dict[str, str]] = {}
     for label, name_label in (
@@ -140,6 +134,30 @@ def fetch_skills(content_id: int | None) -> dict[str, dict[str, str]] | None:
         if block and block["name"]:
             result[label] = block
     return result or None
+
+
+def fetch_skills(content_id: int | None) -> dict[str, dict[str, str]] | None:
+    """按 gamekeeContentId 提取技能组。
+
+    返回 {"技能1": {...}, "技能2": {...}, "爆裂技能": {...}}；缓存缺失返回 None。
+    """
+    rows = _load_content_rows(content_id)
+    if rows is None:
+        return None
+    return _rows_to_skills(rows)
+
+
+def fetch_skills_online(content_id: int | None) -> dict[str, dict[str, str]] | None:
+    """在线兜底：按 content_id 从 GameKee 拉取并解析技能组。"""
+    from .online import fetch_online_payload
+
+    if not content_id:
+        return None
+    payload = fetch_online_payload(content_id)
+    if not payload or not payload.get("baseData"):
+        return None
+    rows = [row for row in payload["baseData"] if isinstance(row, list)]
+    return _rows_to_skills(rows)
 
 
 def fetch_skills_from_dictionary(rec: dict[str, Any]) -> dict[str, dict[str, str]] | None:

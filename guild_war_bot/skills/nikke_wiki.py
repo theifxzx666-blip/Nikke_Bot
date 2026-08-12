@@ -61,7 +61,8 @@ class NikkeWikiSkill:
         index = self._get_index()
         rec = index.lookup(query)
         if rec is None:
-            return not_found_text(query)
+            # P2：本地未命中 -> GameKee 在线兜底
+            return self._handle_online(query)
         return self._reply_with_portrait(rec, context)
 
     def _handle_wiki(self, arg: str, context: SkillContext) -> str:
@@ -71,9 +72,28 @@ class NikkeWikiSkill:
         index = self._get_index()
         rec = index.lookup(query)
         if rec is None:
-            # P2 起改为调用 GameKee 在线检索
-            return not_found_text(query)
+            # P2：GameKee 在线兜底
+            return self._handle_online(query)
         return self._reply_with_portrait(rec, context)
+
+    def _handle_online(self, query: str) -> str:
+        """GameKee 在线兜底：搜索角色并按 content_id 拉取技能。"""
+        from ..wiki_query.online import search_role
+        from ..wiki_query.skills import fetch_skills_online
+
+        role = search_role(query)
+        if role is None:
+            return not_found_text(query)
+        content_id = role.get("content_id")
+        name = str(role.get("name") or query).strip()
+        if not content_id:
+            return f"角色「{name}」在 GameKee 已找到，但暂无详情数据。"
+        skills = fetch_skills_online(content_id)
+        if not skills:
+            return f"角色「{name}」已找到，但技能资料暂未收录（GameKee 在线获取失败）。"
+        from ..wiki_query.skills import format_skills_text
+
+        return f"【{name}】（GameKee 在线数据）\n\n{format_skills_text(skills)}"
 
     def _reply_with_portrait(self, rec: dict, context: SkillContext) -> str:
         """返回角色卡文本（含技能组与珍藏品），并尝试发送本地立绘。"""
