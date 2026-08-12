@@ -58,3 +58,4 @@ data/_ollama_probe*.json
 data/astrbot_restart.txt
 data/astrbot_start.txt
 data/plugin_reload.txt
+data/_p2_probe*.py
