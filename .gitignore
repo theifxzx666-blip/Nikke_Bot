@@ -74,3 +74,4 @@ data/win_check.txt
 data/skill_test_result.txt
 data/_check_*.py
 data/online_portraits/
+data/_build_*.py
