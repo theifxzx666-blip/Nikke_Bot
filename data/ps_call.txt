@@ -1,0 +1,17 @@
+﻿argv[0]:F:\Codex\Nikke\Nikke_Bot\supports\NapCat.Shell.Windows.OneKey\NapCatWinBootMain.exe
+argv[1]:E:\[Chat]Tencent\QQNT\QQ.exe
+argv[2]:F:\Codex\Nikke\Nikke_Bot\supports\NapCat.Shell.Windows.OneKey\NapCatWinBootHook.dll
+argv[3]:1255348850
+Boot Command:"E:\[Chat]Tencent\QQNT\QQ.exe" --enable-logging -q 1255348850
+[NapCat Backend] Main Process ID:13224
+Creating pipe: \\.\pipe\NapCat_13224
+[NapCat Backend] Process resumed
+config_current_version:9.9.29-47354
+
+config_prev_version:
+
+load from:E:\[Chat]Tencent\QQNT\versions\9.9.29-47354\QQNT.dll
+
+Process exited.
+Press any key to continue . . . 
+EXIT=0
