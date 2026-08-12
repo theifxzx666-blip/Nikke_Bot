@@ -1,0 +1,390 @@
+[
+ {
+  "name": "麦斯威尔：平凡技师",
+  "cnName": "麦斯威尔：平凡技师",
+  "aliases": "麦斯威尔：平凡技师",
+  "gamekeeContentId": 713899,
+  "gamekeeCnName": "麦斯威尔：平凡技师",
+  "skills": {
+   "skill1": {
+    "name": "阶段解除限制",
+    "type": "被动",
+    "cooldown": "无",
+    "effect": "■全蓄力攻击时，赋予全体队友\n【以施展者为基准的最大体力0.5%▲】【叠加30次】【持续】\n■进入爆裂阶段3时，全体队友\n【攻击伤害6.25%▲】【持续5秒】",
+    "desc_lv10": ""
+   },
+   "skill2": {
+    "name": "输出切换进程",
+    "type": "被动",
+    "cooldown": "无",
+    "effect": "■使用爆裂技能时，全体队友\n【相当于施展者最终最大体力0.5%的攻击力▲】【持续15秒】\n■使用爆裂技能时，自身\n【超载电流：攻击力15%▲】【最多5阶段】【持续】\n■全蓄力攻击时，全体队友\n【爆裂进度补充3.58%】",
+    "desc_lv10": ""
+   },
+   "burstSkill": {
+    "name": "墨提斯部队超级破坏炮",
+    "type": "爆裂技能",
+    "cooldown": "20s",
+    "effect": "■自身\n【变更使用武器：墨提斯部队超级破坏砲】：\n【蓄力时间】\n【超载电流各阶段效果】【仅套用对应阶段效果】\n蓄力时间：3秒\n阶段1以下：固定3秒\n阶段2：固定2.5秒\n阶段3：固定2秒\n阶段4：固定1.5秒\n阶段5以上：固定0.4秒\n伤害：最终攻击力175%的伤害\n全蓄力伤害：300%\n最大装弹数：1发\n额外效果：【穿透特化】\n■全体队友\n【攻击伤害12.5%▲】【持续10秒】",
+    "desc_lv10": ""
+   }
+  },
+  "favoriteItem": {
+   "status": "待确认",
+   "itemName": "",
+   "note": "补充词典角色"
+  },
+  "manufacturer": "米西利斯",
+  "squad": "墨提斯部队",
+  "burst": "二阶",
+  "element": "风压",
+  "class": "辅助型",
+  "weapon": "狙击步枪",
+  "weaponName": "我的神圣宝贝",
+  "rarity": "SSR",
+  "gamekeeCompanyCn": "米西利斯",
+  "gamekeeElementCn": "风压",
+  "gamekeeClassCn": "辅助型",
+  "gamekeeWeaponCn": "狙击步枪",
+  "gamekeeStageCn": "二阶",
+  "gamekeeRarityCn": "SSR"
+ },
+ {
+  "name": "拉普拉斯：究极英雄",
+  "cnName": "拉普拉斯：究极英雄",
+  "aliases": "拉普拉斯：究极英雄",
+  "gamekeeContentId": 713891,
+  "gamekeeCnName": "拉普拉斯：究极英雄",
+  "skills": {
+   "skill1": {
+    "name": "电力全满完全蓄力",
+    "type": "被动",
+    "cooldown": "无",
+    "effect": "■战斗开始时，自身\n【相当于施展者最终最大体力1.69%的攻击力▲】【持续】\n■全蓄力攻击时，自身\n【预热：蓄力速度5%▲】【叠加5次】【持续】\n■当自身处于预热最大叠加状态时，解除叠加后，自身\n【变更使用武器：电力全满完全蓄力】：\n伤害：最终攻击力2.64%的伤害\n最大装弹数：120发（变更使用武器时，更新最大装弹数效果）\n解除时间：所有子弹射击完毕时\n额外效果：穿透特化\n■电力全满完全蓄力结束时，自身\n【子弹减少100%】",
+    "desc_lv10": ""
+   },
+   "skill2": {
+    "name": "能量超载",
+    "type": "被动",
+    "cooldown": "无",
+    "effect": "■普通攻击12次时，若自身处于电力全满完全蓄力状态，则自身\n【能量超载5%▲】【最大100%】【持续】\n■当自身能量超载达100%时，重置后自身\n【能量超载阶段增加】【能量超载各阶段效果】【低阶效果重复生效】\n阶段1：【仅最大体1.18%▲】【持续】\n阶段2：【仅最大体1.77%▲】【持续】\n阶段3：【仅最大体4.13%▲】【持续】\n阶段4：【仅最大体力6.2%▲】【持续】\n■进入爆裂3阶时，自身\n【攻击伤害30.81%▲】【持续10秒】",
+    "desc_lv10": ""
+   },
+   "burstSkill": {
+    "name": "再生电力武装：雷霆战锤",
+    "type": "爆裂技能",
+    "cooldown": "40s",
+    "effect": "■自身\n【攻击力37.44%▲】【持续10秒】\n■对全体敌人造成\n【最终攻击力1745.45%的爆裂技能伤害】\n■若自身处于阶段1以上的能量超载状态，则对距离瞄准线最近的1名敌人造成\n【最终攻击力552.36%x能量超载阶段的额外伤害】",
+    "desc_lv10": ""
+   }
+  },
+  "favoriteItem": {
+   "status": "待确认",
+   "itemName": "",
+   "note": "补充词典角色"
+  },
+  "manufacturer": "米西利斯",
+  "squad": "墨提斯部队",
+  "burst": "三阶",
+  "element": "风压",
+  "class": "火力型",
+  "weapon": "发射器",
+  "weaponName": "究极英雄症候群",
+  "rarity": "SSR",
+  "gamekeeCompanyCn": "米西利斯",
+  "gamekeeElementCn": "风压",
+  "gamekeeClassCn": "火力型",
+  "gamekeeWeaponCn": "发射器",
+  "gamekeeStageCn": "三阶",
+  "gamekeeRarityCn": "SSR"
+ },
+ {
+  "name": "玛律恰那：海洋进修",
+  "cnName": "玛律恰那：海洋进修",
+  "aliases": "玛律恰那：海洋进修",
+  "gamekeeContentId": 711739,
+  "gamekeeCnName": "玛律恰那：海洋进修",
+  "skills": {
+   "skill1": {
+    "name": "紧急哨子",
+    "type": "被动",
+    "cooldown": "无",
+    "effect": "■全爆裂时间开始时，若此前自身使用过爆裂技能，对最终最大体力最高的1名敌人\n【指定警戒对象】：\n效果1：【最终攻击力2239.1%的额外伤害】\n效果2：目标存活时【警戒对象：攻击力6.24%▼】【持续10秒】\n■敌人死亡时，若目标处于警戒对象状态，对随机1名敌人\n【指定警戒对象】：\n效果1：【最终攻击力2239.1%的额外伤害】\n效果2：目标存活时【警戒对象：攻击力6.24%▼】【持续10秒】\n■普通攻击命中20次时，若目标为高危险对象状态，则对目标造成\n【最终攻击力96.82%的额外伤害】",
+    "desc_lv10": ""
+   },
+   "skill2": {
+    "name": "企鹅紧急出动",
+    "type": "被动",
+    "cooldown": "无",
+    "effect": "■战斗开始时，自身\n【哨子：攻击力19.34%▲】【叠加5次】【持续】\n【哨子叠加量4个▲】\n■每当莱彻为3架以下的情况持续5秒时，自身\n【哨子：攻击力19.34%▲】【叠加5次】【持续】\n■每当莱彻为6架以上的情况持续1秒时，\n【企鹅紧急出动】：\n功能：莱彻数量在6架以上时，消耗哨子并对莱彻发动紧急攻击。\n效果1：对全体敌人造成相当于【最终攻击力126.67%的额外伤害】\n效果2：自身【哨子叠加量1个▼】\n■莱彻出现及死亡时，仅限莱彻数量在5架以下的状态，自身\n【优越代码攻击伤害12.06%▲】【持续】",
+    "desc_lv10": ""
+   },
+   "burstSkill": {
+    "name": "企鹅螺旋",
+    "type": "爆裂技能",
+    "cooldown": "40s",
+    "effect": "■自身\n【优越代码攻击伤害18.3%▲】【持续10秒】\n【攻击伤害16.22%▲】【持续10秒】\n■对全体电击代码的敌人\n【高危险对象：防御力6.24%▼】【持续20秒】",
+    "desc_lv10": ""
+   }
+  },
+  "favoriteItem": {
+   "status": "待确认",
+   "itemName": "",
+   "note": "补充词典角色"
+  },
+  "manufacturer": "极乐净土",
+  "squad": "学术界",
+  "burst": "三阶",
+  "element": "铁甲",
+  "class": "火力型",
+  "weapon": "步枪",
+  "weaponName": "企鹅救援",
+  "rarity": "SSR",
+  "gamekeeCompanyCn": "极乐净土",
+  "gamekeeElementCn": "铁甲",
+  "gamekeeClassCn": "火力型",
+  "gamekeeWeaponCn": "步枪",
+  "gamekeeStageCn": "三阶",
+  "gamekeeRarityCn": "SSR"
+ },
+ {
+  "name": "灰姑娘：琉璃波光",
+  "cnName": "灰姑娘：琉璃波光",
+  "aliases": "灰姑娘：琉璃波光",
+  "gamekeeContentId": 711133,
+  "gamekeeCnName": "灰姑娘：琉璃波光",
+  "skills": {
+   "skill1": {
+    "name": "美丽·全开",
+    "type": "被动",
+    "cooldown": "无",
+    "effect": "■换弹填满弹匣后，若自身处于切换准备状态，自身\n【变更使用武器：狙击模式】：\n蓄力时间：1秒\n伤害：造成相当于最终攻击力62.13%的伤害\n全蓄力伤害：250%伤害\n最大装弹数：15发（完成换弹后，最大装弹数效果将更新）\n额外效果1：穿透特化\n额外效果2：全蓄力攻击时消耗子弹40发\n额外效果3：蓄力时间固定为1秒\n解除条件：在切换准备状态下，换弹填满弹匣\n■战斗开始时，自身\n【美丽-全开：攻击伤害13.2%▲】【持续】\n■换弹填满弹匣后，自身\n【切换准备：换弹时间固定为3秒】【持续6秒】\n【最后的子弹攻击时解除】\n■每5秒对距离瞄准线最近的1名敌人\n【造成相当于最终攻击力450%的伤害】\n■队友消耗的子弹数总和每达到200发时，全体队友\n【爆裂进度补充7.09%】",
+    "desc_lv10": ""
+   },
+   "skill2": {
+    "name": "模式切换",
+    "type": "被动",
+    "cooldown": "无",
+    "effect": "■战斗开始时及使用爆裂技能时，自身\n【诱饵：产生相当于施展者最终最大体力41.56%的分身】\n【持续】\n■战斗开始时，自身\n【攻击力15.95%▲】【持续】\n■狙击模式生效时，自身\n【毁灭：零件伤害13.11%▲】【持续】\n【解除精准】\n■战斗开始时与狙击模式解除时，自身\n【精准：核心伤害13%▲】\n【持续】\n【解除毁灭】\n■全爆裂时间开始时，若此前自身使用过爆裂技能，\n【不同套用模式不同效果】\n【只发动对应效果】\n若自身处于狙击模式，对全体敌人（包括零件）造成\n效果1：\n【最终攻击力654.31%的伤害】\n若自身不处于狙击模式，则对核心启动的所有敌人造成\n效果1：\n【最终攻击力458.58%的核心命中伤害】",
+    "desc_lv10": ""
+   },
+   "burstSkill": {
+    "name": "水晶鞋·完全连接W",
+    "type": "爆裂技能",
+    "cooldown": "40s",
+    "effect": "■自身\n【攻击伤害46%▲】【持续10秒】\n【攻击力35.75%▲】【持续10秒】\n■对最终攻击力最高的1名敌人造成\n【最终攻击力3299.97%的爆裂技能伤害】",
+    "desc_lv10": ""
+   }
+  },
+  "favoriteItem": {
+   "status": "待确认",
+   "itemName": "",
+   "note": "补充词典角色"
+  },
+  "manufacturer": "朝圣者",
+  "squad": "远古故事",
+  "burst": "三阶",
+  "element": "铁甲",
+  "class": "火力型",
+  "weapon": "机枪",
+  "weaponName": "水晶鞋",
+  "rarity": "SSR",
+  "gamekeeCompanyCn": "朝圣者",
+  "gamekeeElementCn": "铁甲",
+  "gamekeeClassCn": "火力型",
+  "gamekeeWeaponCn": "机枪",
+  "gamekeeStageCn": "三阶",
+  "gamekeeRarityCn": "SSR"
+ },
+ {
+  "name": "方舟黑色游侠",
+  "cnName": "方舟黑色游侠",
+  "aliases": "方舟黑色游侠",
+  "gamekeeContentId": 708686,
+  "gamekeeCnName": "方舟黑色游侠",
+  "skills": {
+   "skill1": {
+    "name": "变身！方舟黑色游侠！",
+    "type": "被动",
+    "cooldown": "无",
+    "effect": "■战斗开始时，自身\n【零件伤害11.81%▲】【持续】\n■当包括自身在内的任一队友破坏零件时，自身\n【电池充电50%】【最大100%】【持续】【无法解除】\n■当电池达100%，自身\n【变身】\n功能：变身为方舟游侠，\n持续消耗电池来强化自身。\n效果1：【电池1%▼】【间隔0.2秒】【持续】【无法解除】\n效果2：【攻击力92.29%▲】【持续】【无法解除】\n解除时间：电池降至0%时\n■进行30次普通攻击时，自身\n【持续伤害35.21%▲】【持续5秒】",
+    "desc_lv10": ""
+   },
+   "skill2": {
+    "name": "颤栗！方舟黑色电流！",
+    "type": "被动",
+    "cooldown": "无",
+    "effect": "■变身状态生效时，或变身状态生效期间敌人登场时，对全体敌人造成\n【方舟黑色电流：最终攻击力27.1%的持续伤害】【间隔1秒】【 变身解除时结束】\n■全爆裂时间开始时，全体风压代码步枪队友\n【持续伤害45.79%▲】【持续10秒】",
+    "desc_lv10": ""
+   },
+   "burstSkill": {
+    "name": "究极！方舟黑色流星！",
+    "type": "爆裂技能",
+    "cooldown": "40s",
+    "effect": "■若自身处于变身状态，则自身\n【电池50%▲】\n■若自身未处于变身状态，对自身发动\n【电池紧急充电】：\n功能：紧急将电池充电并变身为方舟游侠。\n效果1：【电池100%▲】\n效果2：变身后【电池50%▼】\n■对最终最大体力最高的1名敌人造成\n【最终攻击力157.59%的持续伤害】【间隔1秒】【持续10秒】\n■自身\n【持续伤害80.26%▲】【持续10秒】",
+    "desc_lv10": ""
+   }
+  },
+  "favoriteItem": {
+   "status": "待确认",
+   "itemName": "",
+   "note": "补充词典角色"
+  },
+  "manufacturer": "泰特拉",
+  "squad": "女神战队-方舟游侠",
+  "burst": "三阶",
+  "element": "风压",
+  "class": "火力型",
+  "weapon": "步枪",
+  "weaponName": "极黑咆哮",
+  "rarity": "SSR",
+  "gamekeeCompanyCn": "泰特拉",
+  "gamekeeElementCn": "风压",
+  "gamekeeClassCn": "火力型",
+  "gamekeeWeaponCn": "步枪",
+  "gamekeeStageCn": "三阶",
+  "gamekeeRarityCn": "SSR"
+ },
+ {
+  "name": "舒恩",
+  "cnName": "舒恩",
+  "aliases": "舒恩",
+  "gamekeeContentId": 619532,
+  "gamekeeCnName": "舒恩",
+  "skills": {
+   "skill1": {
+    "name": "方舟小偶像",
+    "type": "被动",
+    "cooldown": "无",
+    "effect": "我叫舒恩！\n担任方舟三大公司之一「米傻一斯工业」CEO的美少女！\n可说是人见人爱的方舟小偶像！",
+    "desc_lv10": ""
+   },
+   "skill2": {
+    "name": "舒恩小天使",
+    "type": "被动",
+    "cooldown": "无",
+    "effect": "可是，我最近有特别在乎的人了。 \n他是刚从军校毕业的新人指挥官，可是他居然从不看我一眼？",
+    "desc_lv10": ""
+   },
+   "burstSkill": {
+    "name": "米傻一斯网路串流",
+    "type": "主动",
+    "cooldown": "20s",
+    "effect": "哼！走着瞧！我一定会让你成为我的俘虏！面对我的魅力，再帅气、再善良、再聪明的指挥官都抵抗不了唷？\n因为我是方舟小偶像舒恩嘛！\n……立刻把写这份女偶像企划的王X蛋抓过来！",
+    "desc_lv10": ""
+   }
+  },
+  "favoriteItem": {
+   "status": "待确认",
+   "itemName": "",
+   "note": "补充词典角色"
+  },
+  "manufacturer": "米西利斯",
+  "squad": "反击部队",
+  "burst": "一阶",
+  "element": "水冷",
+  "class": "辅助型",
+  "weapon": "冲锋枪",
+  "rarity": "R",
+  "gamekeeCompanyCn": "米西利斯",
+  "gamekeeElementCn": "水冷",
+  "gamekeeClassCn": "辅助型",
+  "gamekeeWeaponCn": "冲锋枪",
+  "gamekeeStageCn": "一阶",
+  "gamekeeRarityCn": "R"
+ },
+ {
+  "name": "谢芙蒂",
+  "cnName": "谢芙蒂",
+  "aliases": "谢芙蒂",
+  "gamekeeContentId": 589285,
+  "gamekeeCnName": "谢芙蒂",
+  "skills": {
+   "skill1": {
+    "name": "超级操作员",
+    "type": "被动",
+    "cooldown": "无",
+    "effect": "关于愚人节的由来：\n关于愚人节的由来虽然有许多说法，但其中最为可信的就是",
+    "desc_lv10": ""
+   },
+   "skill2": {
+    "name": "恐慌炸弹",
+    "type": "被动",
+    "cooldown": "无",
+    "effect": "【炒年糕食谱】\n①在锅中加入两杯水和年糕块，并用大火煮开。\n②水滚后，倒入调味料搅拌均匀并持续煮沸。\n③煮至收汁后，根据喜好的口味放入葱或芝麻点缀。",
+    "desc_lv10": ""
+   },
+   "burstSkill": {
+    "name": "身陷恐慌",
+    "type": "主动",
+    "cooldown": "10s",
+    "effect": "我要写首愚人节打油诗。\n愚：愚蠢的人啊\n啊，写不下去了。还是明年愚人节再说吧。",
+    "desc_lv10": ""
+   }
+  },
+  "favoriteItem": {
+   "status": "待确认",
+   "itemName": "",
+   "note": "补充词典角色"
+  },
+  "manufacturer": "极乐净土",
+  "squad": "反击部队",
+  "burst": "一阶",
+  "element": "水冷",
+  "class": "辅助型",
+  "weapon": "冲锋枪",
+  "rarity": "R",
+  "gamekeeCompanyCn": "极乐净土",
+  "gamekeeElementCn": "水冷",
+  "gamekeeClassCn": "辅助型",
+  "gamekeeWeaponCn": "冲锋枪",
+  "gamekeeStageCn": "一阶",
+  "gamekeeRarityCn": "R"
+ },
+ {
+  "name": "机甲谢芙蒂",
+  "cnName": "机甲谢芙蒂",
+  "aliases": "机甲谢芙蒂",
+  "gamekeeContentId": 684097,
+  "gamekeeCnName": "机甲谢芙蒂",
+  "skills": {
+   "skill1": {
+    "name": "超合金ZZZ",
+    "type": "被动",
+    "cooldown": "无",
+    "effect": "69 110 106 111 121 101 100 32 116 104 101 32 116 114 97 110 115 108 97 116 105 111 110 63",
+    "desc_lv10": ""
+   },
+   "skill2": {
+    "name": "谢芙蒂UP",
+    "type": "被动",
+    "cooldown": "无",
+    "effect": "\\\\u0046\\\\u0038\\\\u0049\\\\u0020\\\\u0057\\\\u0061\\\\u0072\\\\u006e\\\\u0069\\\\u006e\\\\u0067",
+    "desc_lv10": ""
+   },
+   "burstSkill": {
+    "name": "星球毁灭者",
+    "type": "爆裂技能",
+    "cooldown": "20s",
+    "effect": "....-  -----  ....-     -.  ---  -     ..-.  ---  ..-  -.  -..",
+    "desc_lv10": ""
+   }
+  },
+  "favoriteItem": {
+   "status": "待确认",
+   "itemName": "",
+   "note": "补充词典角色"
+  },
+  "manufacturer": "极乐净土",
+  "burst": "一阶",
+  "element": "水冷",
+  "class": "火力型",
+  "weapon": "发射器",
+  "rarity": "R",
+  "gamekeeCompanyCn": "极乐净土",
+  "gamekeeElementCn": "水冷",
+  "gamekeeClassCn": "火力型",
+  "gamekeeWeaponCn": "发射器",
+  "gamekeeStageCn": "一阶",
+  "gamekeeRarityCn": "R"
+ }
+]

@@ -195,7 +195,8 @@ def fetch_skills_from_dictionary(rec: dict[str, Any]) -> dict[str, dict[str, str
             "type": str(block.get("type") or "").strip(),
             "cooldown": str(block.get("cooldown") or "").strip(),
             "desc": effect,
-            "desc_lv10": "",
+            # 补充词典（characters_extra.json）自带 desc_lv10 珍藏品强化
+            "desc_lv10": str(block.get("desc_lv10") or "").strip(),
         }
     return result or None
 

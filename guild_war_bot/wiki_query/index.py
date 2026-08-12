@@ -65,6 +65,15 @@ class WikiIndex:
             if cn:
                 self.by_cnname[cn] = rec
 
+        # 合并机器人侧补充角色（不修改 Nikke_Wiki，避免被 Codex 更新覆盖）
+        for rec in self._load_extra_characters():
+            name = str(rec.get("name") or "").strip()
+            cn = str(rec.get("cnName") or "").strip()
+            if name:
+                self.by_name[name] = rec
+            if cn:
+                self.by_cnname[cn] = rec
+
         self.by_alias = {}
         if isinstance(aliases, dict):
             for formal, alias_list in aliases.items():
@@ -89,6 +98,18 @@ class WikiIndex:
         logger.info("WikiIndex 加载完成: %d 角色, %d 别名", len(self.characters), len(self.by_alias))
         return True
 
+    def _load_extra_characters(self) -> list[dict[str, Any]]:
+        """加载机器人侧补充角色 data/characters_extra.json。"""
+        extra_path = Path(__file__).resolve().parents[2] / "data" / "characters_extra.json"
+        try:
+            if extra_path.exists():
+                data = _load_json(extra_path)
+                if isinstance(data, list):
+                    return data
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("补充角色表加载失败: %s", exc)
+        return []
+
     def _load_extra_aliases(self) -> dict[str, list[str]]:
         """加载机器人侧补充别名表 data/character_aliases_extra.json。"""
         extra_path = Path(__file__).resolve().parents[2] / "data" / "character_aliases_extra.json"
@@ -102,7 +123,11 @@ class WikiIndex:
         return {}
 
     def lookup(self, query: str) -> dict[str, Any] | None:
-        """按 英文名 / 中文名 / 别名 顺序精确查找，返回角色记录或 None。"""
+        """按 英文名 / 中文名 / 别名 顺序查找，返回角色记录或 None。
+
+        精确匹配失败时，尝试去标点匹配（normalize_query 会移除冒号等标点，
+        而补充词典中的名称保留冒号，如「拉普拉斯：究极英雄」）。
+        """
         q = query.strip()
         if not q:
             return None
@@ -112,6 +137,14 @@ class WikiIndex:
         formal = self.by_alias.get(q)
         if formal:
             return self.by_cnname.get(formal) or self.by_name.get(formal)
+        # 去标点匹配（normalize 已移除冒号，而词典/补充词典名称保留冒号）
+        q_norm = "".join(ch for ch in q if ch.isalnum() or "\u4e00" <= ch <= "\u9fff")
+        if q_norm:
+            for table in (self.by_cnname, self.by_name):
+                for key, rec in table.items():
+                    key_norm = "".join(ch for ch in key if ch.isalnum() or "\u4e00" <= ch <= "\u9fff")
+                    if key_norm == q_norm:
+                        return rec
         return None
 
     def card_text(self, rec: dict[str, Any]) -> str:
