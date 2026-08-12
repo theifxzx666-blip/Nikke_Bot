@@ -280,9 +280,12 @@ def format_skills_text(skills: dict[str, dict[str, str]]) -> str:
             desc_lines = [ln.strip() for ln in desc.splitlines() if ln.strip()]
             block_lines.extend(f"　{ln}" for ln in desc_lines)
         if desc_lv10 and desc_lv10 != desc:
-            # 珍藏品强化效果（lv10）——仅在存在且与普通描述不同时展示
+            # 珍藏品强化效果（lv10）——仅在存在且与普通描述不同时展示；
+            # 与普通效果之间空 1 行分隔
+            block_lines.append("")
             block_lines.append("　【珍藏品强化】")
             lv10_lines = [ln.strip() for ln in desc_lv10.splitlines() if ln.strip()]
             block_lines.extend(f"　{ln}" for ln in lv10_lines)
         blocks.append("\n".join(block_lines))
-    return "\n\n".join(blocks) if blocks else "技能资料暂未收录"
+    # 技能块之间空 2 行分隔（\n\n\n = 两个空行）
+    return "\n\n\n".join(blocks) if blocks else "技能资料暂未收录"
