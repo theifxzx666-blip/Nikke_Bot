@@ -17,6 +17,25 @@ EXTRA_OUT = Path(__file__).resolve().parents[1] / "data" / "character_aliases_ex
 # 分隔符：| 和 ；; 混合
 SEP = re.compile(r"[|；;]")
 
+# ===== 用户指定保留的别名（xlsx 同步后强制补回，勿删）=====
+# 有些别名在 xlsx 中未体现（如用户只在旧表维护过），但用户明确要求保留。
+KEEP_ALIASES: dict[str, list[str]] = {
+    "拉毗：小红帽": ["拉毗红帽", "小红帽拉毗"],
+    "艾达": ["艾达王"],
+}
+
+
+def apply_keep_aliases(data: dict[str, list[str]]) -> dict[str, list[str]]:
+    """xlsx 同步后强制补回用户指定保留的别名。"""
+    for name, aliases in KEEP_ALIASES.items():
+        if name not in data:
+            data[name] = []
+        for a in aliases:
+            if a not in data[name]:
+                data[name].append(a)
+        print(f"  🔒 保留 {name}: {data[name]}")
+    return data
+
 
 def split_aliases(raw: str) -> list[str]:
     parts = [p.strip() for p in SEP.split(raw) if p.strip()]
@@ -63,6 +82,9 @@ def main():
         del merged[k]
     if removed:
         print(f"移除（xlsx 该角色已无别名）: {removed}")
+
+    # 用户指定保留（xlsx 未体现但用户要求保留）
+    apply_keep_aliases(merged)
 
     print(f"同步角色数: {len(result)}（跳过纯自引用 {skip_self} 行），合并后共 {len(merged)} 角色")
 
