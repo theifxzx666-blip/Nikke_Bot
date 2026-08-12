@@ -56,7 +56,7 @@ def _parse_skill_block(
     """从技能块的行列表中解析（名称/类型/冷却/描述）。
 
     块结构（block_rows 为该技能块边界内的行）：
-      技能N名称 | <名称>
+      技能N名称/爆裂技能 | <名称>
       技能N图标 | <图标>
       冷却时间  | <无/秒>
       技能类型  | <被动/主动/爆裂>
@@ -64,6 +64,10 @@ def _parse_skill_block(
       技能描述（lv10)） | <满级描述>
     """
     name, skill_type, cooldown, desc, desc_lv10 = "", "", "", "", ""
+    # 名称标签兼容「爆裂技能名称」与「爆裂技能」两种写法
+    name_labels = {name_label}
+    if name_label == "爆裂技能名称":
+        name_labels.add("爆裂技能")
     found_name = False
     for row in block_rows:
         cells = _row_values(row)
@@ -71,7 +75,7 @@ def _parse_skill_block(
             continue
         label = cells[0]
         value = cells[1] if len(cells) > 1 else ""
-        if label == name_label and value:
+        if label in name_labels and value:
             name = value
             found_name = True
         elif label == "冷却时间" and value:
@@ -97,7 +101,8 @@ def _parse_skill_block(
 def _skill_block_ranges(rows: list[list[dict[str, Any]]]) -> dict[str, tuple[int, int]]:
     """按名称标签切分技能块边界，返回 {块标签: (start, end)}。
 
-    边界：技能1名称 -> 技能2名称 -> 爆裂技能名称 -> 普攻(或结束)。
+    边界：技能1名称 -> 技能2名称 -> 爆裂技能名称/爆裂技能 -> 普攻(或结束)。
+    注意：部分角色（尤其在线新数据）爆裂块标签是「爆裂技能」而非「爆裂技能名称」。
     """
     name_rows: list[tuple[int, str]] = []
     end_row = len(rows)
@@ -106,7 +111,7 @@ def _skill_block_ranges(rows: list[list[dict[str, Any]]]) -> dict[str, tuple[int
         if not cells:
             continue
         label = cells[0]
-        if label in ("技能1名称", "技能2名称", "爆裂技能名称"):
+        if label in ("技能1名称", "技能2名称", "爆裂技能名称", "爆裂技能"):
             name_rows.append((i, label))
         elif label == "普攻" and end_row == len(rows):
             end_row = i
@@ -122,15 +127,19 @@ def _rows_to_skills(rows: list[list[dict[str, Any]]]) -> dict[str, dict[str, str
     """从 baseData 行列表解析技能组（本地缓存与在线数据共用）。"""
     ranges = _skill_block_ranges(rows)
     result: dict[str, dict[str, str]] = {}
-    for label, name_label in (
-        ("技能1", "技能1名称"),
-        ("技能2", "技能2名称"),
-        ("爆裂技能", "爆裂技能名称"),
+    for label, name_labels in (
+        ("技能1", ("技能1名称",)),
+        ("技能2", ("技能2名称",)),
+        ("爆裂技能", ("爆裂技能名称", "爆裂技能")),
     ):
-        span = ranges.get(name_label)
+        span = None
+        for nl in name_labels:
+            if nl in ranges:
+                span = ranges[nl]
+                break
         if not span:
             continue
-        block = _parse_skill_block(rows[span[0] : span[1]], name_label)
+        block = _parse_skill_block(rows[span[0] : span[1]], name_labels[0])
         if block and block["name"]:
             result[label] = block
     return result or None

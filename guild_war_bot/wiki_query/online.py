@@ -140,6 +140,36 @@ def fetch_online_payload(content_id: int) -> dict[str, Any] | None:
         return None
 
 
+# 在线角色卡基本属性标签（标签名 -> 展示名）
+_ONLINE_PROFILE_LABELS = (
+    ("企业", "阵营"),
+    ("部队名称", "部队"),
+    ("阶段", "爆裂"),
+    ("属性", "元素"),
+    ("职业", "职业"),
+    ("武器", "武器"),
+    ("武器（名）", "武器名"),
+    ("稀有度", "稀有度"),
+)
+
+
+def format_online_profile(rows: list[list[dict[str, Any]]]) -> str:
+    """从在线 baseData 提取基本属性，生成角色卡头部文本。"""
+    labels: dict[str, str] = {}
+    for row in rows:
+        if not isinstance(row, list):
+            continue
+        cells = [c.get("value", "") for c in row if isinstance(c, dict)]
+        if cells and cells[0]:
+            labels[cells[0]] = cells[1] if len(cells) > 1 else ""
+    lines = []
+    for tag, display in _ONLINE_PROFILE_LABELS:
+        value = str(labels.get(tag) or "").strip()
+        if value:
+            lines.append(f"{display}：{value}")
+    return "\n".join(lines)
+
+
 def download_portrait(role: dict[str, Any], out_dir: Path, name: str) -> Path | None:
     """下载树节点 icon 立绘到本地缓存目录，返回本地路径（失败返回 None）。
 

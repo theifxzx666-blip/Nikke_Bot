@@ -78,7 +78,12 @@ class NikkeWikiSkill:
 
     def _handle_online(self, query: str, context: SkillContext) -> str:
         """GameKee 在线兜底：搜索角色、拉取技能、下载立绘并发送。"""
-        from ..wiki_query.online import download_portrait, search_role
+        from ..wiki_query.online import (
+            download_portrait,
+            fetch_online_payload,
+            format_online_profile,
+            search_role,
+        )
         from ..wiki_query.skills import fetch_skills_online, format_skills_text
 
         role = search_role(query)
@@ -92,6 +97,12 @@ class NikkeWikiSkill:
         if not skills:
             return f"角色「{name}」已找到，但技能资料暂未收录（GameKee 在线获取失败）。"
 
+        # 基本属性（角色卡头部）
+        profile = ""
+        payload = fetch_online_payload(content_id)
+        if payload and payload.get("baseData"):
+            profile = format_online_profile(payload["baseData"])
+
         # 下载立绘并发送
         if context.reply is not None:
             try:
@@ -103,7 +114,12 @@ class NikkeWikiSkill:
                 # 立绘下载/发送失败不阻断技能回复
                 pass
 
-        return f"【{name}】（GameKee 在线数据）\n\n{format_skills_text(skills)}"
+        parts = [f"【{name}】（GameKee 在线数据）"]
+        if profile:
+            parts.append(profile)
+        parts.append("")
+        parts.append(format_skills_text(skills))
+        return "\n".join(parts)
 
     def _reply_with_portrait(self, rec: dict, context: SkillContext) -> str:
         """返回角色卡文本（含技能组与珍藏品），并尝试发送本地立绘。"""
