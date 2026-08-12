@@ -81,6 +81,15 @@ class NikkeWikiSkill:
         if not query:
             return "用法：/养成 <角色名>，例如 /养成 红莲"
         meta = load_meta()
+        # 优先用 WikiIndex 解析角色名（继承别名/倒序/去标点匹配），再查培养数据
+        index_rec = self._get_index().lookup(query)
+        if index_rec is not None:
+            formal = str(index_rec.get("cnName") or index_rec.get("name") or "").strip()
+            if formal:
+                text = format_meta_text(meta, formal)
+                if text:
+                    self._send_meta_crop(formal, context)
+                    return text
         text = format_meta_text(meta, query)
         if text is None:
             return missing_text(query)

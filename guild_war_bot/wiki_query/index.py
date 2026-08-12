@@ -145,6 +145,25 @@ class WikiIndex:
                     key_norm = "".join(ch for ch in key if ch.isalnum() or "\u4e00" <= ch <= "\u9fff")
                     if key_norm == q_norm:
                         return rec
+        # 兜底：形态角色倒序/部分匹配（覆盖社区简称，如「女仆马斯特」→「马斯特：浪漫的女仆」、
+        # 「暗影红莲」→「红莲：暗影」、「冬日甜心迪塞尔」→「迪塞尔：冬日甜心」）
+        if q_norm and len(q_norm) >= 4:
+            for cn, rec in self.by_cnname.items():
+                if "：" not in cn:
+                    continue
+                base, variant = cn.split("：", 1)
+                base_n = "".join(ch for ch in base if ch.isalnum() or "\u4e00" <= ch <= "\u9fff")
+                var_n = "".join(ch for ch in variant if ch.isalnum() or "\u4e00" <= ch <= "\u9fff")
+                if not base_n or not var_n:
+                    continue
+                # 倒序：形态词 + 基础名（如 浪漫的女仆马斯特）
+                if q_norm == var_n + base_n:
+                    return rec
+                # 部分：query 含基础名，剩余部分 ⊆ 形态词（如 女仆马斯特）
+                if base_n in q_norm:
+                    rest = q_norm.replace(base_n, "", 1)
+                    if rest and len(rest) >= 2 and rest in var_n:
+                        return rec
         return None
 
     def card_text(self, rec: dict[str, Any]) -> str:
