@@ -20,11 +20,12 @@ from .base import IncomingMessage, SkillContext
 
 _ROLE_KEYWORDS: tuple[str, ...] = ("角色", "查角色", "角色卡", "是谁")
 _WIKI_KEYWORDS: tuple[str, ...] = ("wiki", "查")
+_META_KEYWORDS: tuple[str, ...] = ("培养", "培养建议", "加点", "怎么培养")
 
 
 class NikkeWikiSkill:
     name: str = "nikke_wiki"
-    commands: ClassVar[set[str]] = {"角色", "wiki"}
+    commands: ClassVar[set[str]] = {"角色", "wiki", "培养"}
     _index: WikiIndex | None = None
 
     @classmethod
@@ -35,9 +36,11 @@ class NikkeWikiSkill:
 
     def matches(self, message: IncomingMessage) -> bool:
         content = normalize_command(message.raw_text or message.command)
-        return extract_after_keyword(content, _ROLE_KEYWORDS) is not None or extract_after_keyword(
-            content, _WIKI_KEYWORDS
-        ) is not None
+        return (
+            extract_after_keyword(content, _ROLE_KEYWORDS) is not None
+            or extract_after_keyword(content, _WIKI_KEYWORDS) is not None
+            or extract_after_keyword(content, _META_KEYWORDS) is not None
+        )
 
     def handle(self, message: IncomingMessage, context: SkillContext) -> str | None:
         content = normalize_command(message.raw_text or message.command)
@@ -46,6 +49,11 @@ class NikkeWikiSkill:
         role_arg = extract_after_keyword(content, _ROLE_KEYWORDS)
         if role_arg is not None:
             return self._handle_role(role_arg, context)
+
+        # /培养 <名>：培养建议（屑夫蒂一图流，P3）
+        meta_arg = extract_after_keyword(content, _META_KEYWORDS)
+        if meta_arg is not None:
+            return self._handle_meta(meta_arg)
 
         # /wiki <词>：P1 先用本地索引；P2 接在线兜底
         wiki_arg = extract_after_keyword(content, _WIKI_KEYWORDS)
@@ -64,6 +72,19 @@ class NikkeWikiSkill:
             # P2：本地未命中 -> GameKee 在线兜底
             return self._handle_online(query, context)
         return self._reply_with_portrait(rec, context)
+
+    def _handle_meta(self, arg: str) -> str:
+        """培养建议查询（屑夫蒂一图流 P3）。"""
+        from ..wiki_query.meta import format_meta_text, load_meta, missing_text
+
+        query = normalize_query(arg)
+        if not query:
+            return "用法：/培养 <角色名>，例如 /培养 红莲"
+        meta = load_meta()
+        text = format_meta_text(meta, query)
+        if text is None:
+            return missing_text(query)
+        return text
 
     def _handle_wiki(self, arg: str, context: SkillContext) -> str:
         query = normalize_query(arg)
