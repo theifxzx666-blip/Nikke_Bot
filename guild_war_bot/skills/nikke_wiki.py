@@ -62,7 +62,7 @@ class NikkeWikiSkill:
         rec = index.lookup(query)
         if rec is None:
             # P2：本地未命中 -> GameKee 在线兜底
-            return self._handle_online(query)
+            return self._handle_online(query, context)
         return self._reply_with_portrait(rec, context)
 
     def _handle_wiki(self, arg: str, context: SkillContext) -> str:
@@ -73,13 +73,13 @@ class NikkeWikiSkill:
         rec = index.lookup(query)
         if rec is None:
             # P2：GameKee 在线兜底
-            return self._handle_online(query)
+            return self._handle_online(query, context)
         return self._reply_with_portrait(rec, context)
 
-    def _handle_online(self, query: str) -> str:
-        """GameKee 在线兜底：搜索角色并按 content_id 拉取技能。"""
-        from ..wiki_query.online import search_role
-        from ..wiki_query.skills import fetch_skills_online
+    def _handle_online(self, query: str, context: SkillContext) -> str:
+        """GameKee 在线兜底：搜索角色、拉取技能、下载立绘并发送。"""
+        from ..wiki_query.online import download_portrait, search_role
+        from ..wiki_query.skills import fetch_skills_online, format_skills_text
 
         role = search_role(query)
         if role is None:
@@ -91,7 +91,17 @@ class NikkeWikiSkill:
         skills = fetch_skills_online(content_id)
         if not skills:
             return f"角色「{name}」已找到，但技能资料暂未收录（GameKee 在线获取失败）。"
-        from ..wiki_query.skills import format_skills_text
+
+        # 下载立绘并发送
+        if context.reply is not None:
+            try:
+                out_dir = Path(__file__).resolve().parents[2] / "data" / "online_portraits"
+                portrait = download_portrait(role, out_dir, name)
+                if portrait:
+                    context.reply.send_image(portrait)
+            except Exception:
+                # 立绘下载/发送失败不阻断技能回复
+                pass
 
         return f"【{name}】（GameKee 在线数据）\n\n{format_skills_text(skills)}"
 

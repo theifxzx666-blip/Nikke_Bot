@@ -16,6 +16,7 @@ import logging
 import socket
 import urllib.error
 import urllib.request
+from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -137,3 +138,25 @@ def fetch_online_payload(content_id: int) -> dict[str, Any] | None:
         return {"baseData": base}
     except (json.JSONDecodeError, AttributeError):
         return None
+
+
+def download_portrait(role: dict[str, Any], out_dir: Path, name: str) -> Path | None:
+    """下载树节点 icon 立绘到本地缓存目录，返回本地路径（失败返回 None）。
+
+    文件名用角色名清洗后命名，避免 URL 参数导致的无效文件名。
+    """
+    icon = str(role.get("icon") or "").strip()
+    if not icon:
+        return None
+    if icon.startswith("//"):
+        icon = "https:" + icon
+    try:
+        raw = urllib.request.urlopen(urllib.request.Request(icon, headers=HEADERS), timeout=30).read()
+    except (urllib.error.URLError, urllib.error.HTTPError, socket.timeout) as exc:
+        logger.warning("立绘下载失败 %s: %s", icon, exc)
+        return None
+    safe = "".join(ch for ch in name if ch.isalnum() or ch in "-_")[:40] or "role"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    path = out_dir / f"{safe}.png"
+    path.write_bytes(raw)
+    return path
