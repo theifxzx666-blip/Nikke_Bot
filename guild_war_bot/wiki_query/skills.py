@@ -191,19 +191,35 @@ def fetch_skills_from_dictionary(rec: dict[str, Any]) -> dict[str, dict[str, str
     return result or None
 
 
+def _has_treasure(rec: dict[str, Any]) -> bool:
+    """判断角色是否有珍藏品。
+
+    词典 favoriteItem.status=已确认 优先；其次用缓存探测——
+    缓存内容里存在「珍藏品名称」非空值即视为有珍藏品（词典可能滞后）。
+    """
+    fav = rec.get("favoriteItem")
+    if isinstance(fav, dict) and fav.get("status") == "已确认":
+        return True
+    # 缓存探测：珍藏品名称标签有实际值
+    rows = _load_content_rows(rec.get("gamekeeContentId"))
+    if rows is None:
+        return False
+    for row in rows:
+        cells = _row_values(row)
+        if cells and cells[0] == "珍藏品名称":
+            return bool(len(cells) > 1 and cells[1].strip())
+    return False
+
+
 def resolve_skills(rec: dict[str, Any]) -> dict[str, dict[str, str]] | None:
     """获取角色技能组。
 
     优先级：
-      1. 角色有珍藏品（favoriteItem.status=已确认）且内容缓存可解析 → 用缓存
+      1. 角色有珍藏品（词典已确认 或 缓存探测到）且内容缓存可解析 → 用缓存
          （缓存含 lv10 珍藏品强化效果，词典只存 lv1 效果）
       2. 否则用词典内置 skills，effect 缺失时回退缓存补齐。
     """
-    has_treasure = (
-        isinstance(rec.get("favoriteItem"), dict)
-        and rec.get("favoriteItem", {}).get("status") == "已确认"
-    )
-    if has_treasure:
+    if _has_treasure(rec):
         cached = fetch_skills(rec.get("gamekeeContentId"))
         if cached:
             return cached
