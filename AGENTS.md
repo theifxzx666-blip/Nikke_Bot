@@ -100,6 +100,14 @@ AstrBot 插件开发要对齐 AstrBot 项目当前结构：插件目录使用 `m
 - 中文菜单、中文提示和复杂逻辑放进 `.ps1`。
 - 不要把中文菜单写回 `.bat`，否则 Windows `cmd.exe` 可能把中文片段误当命令执行。
 
+## 角色别名数据流（角色卡查询/养成建议）
+
+- **权威数据源**：`F:\Codex\Nikke\Nikke_Wiki\exports\nikke_character_dictionary_with_images_updated.xlsx`（Codex 导出的角色卡登记表，含"别名"列，用户在此维护别名）。
+- **同步脚本**：`tools/sync_aliases_from_xlsx.py` 读取 xlsx 别名列（`|` 和 `；;` 混合分隔，去自身名）→ 写入机器人侧 `data/character_aliases_extra.json`（**以 xlsx 为准**：xlsx 中该角色无有效别名则从补充表移除）。重跑：`PYTHONPATH=F:/Codex/Nikke/Nikke_Bot .venv/Scripts/python.exe tools/sync_aliases_from_xlsx.py`。
+- **加载合并**：`guild_war_bot/wiki_query/index.py` 的 `WikiIndex.load()` 合并 `nikke_character_aliases.json`（Codex 源）+ `character_aliases_extra.json`（机器人侧）；`lookup()` 还支持去标点、倒序（暗影红莲）、部分匹配（女仆马斯特）兜底。
+- **生效**：改完 extra 后需重启桥接服务（`guild_war_bot.service_http`，端口 8793）让新别名生效。
+- **培养建议**：`data/character_meta.json` + `data/meta_crops/<角色名>.png`（屑夫蒂一图流 OCR 提取，`tools/build_character_meta.py` 重跑）；`/养成 <角色名>` 命令查询。
+
 ## 验证命令
 
 ```powershell
