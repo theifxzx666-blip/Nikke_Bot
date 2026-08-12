@@ -34,7 +34,7 @@ SCALE = 1.5      # OCR 放大倍率
 CROP_UP = 720    # 角色区块向上延伸（立绘+字段）
 CROP_HALF_W = 400  # 区块横向半宽
 
-FIELD_LABELS = ["装备", "词条", "技能", "魔方", "收藏品", "珍藏品"]
+FIELD_LABELS = ["装备", "词条", "技能", "魔方", "收藏品", "珍藏品", "强度", "强度评级"]
 
 
 def ocr_full_image() -> list[dict]:
@@ -164,6 +164,8 @@ def extract(blocks, name_map):
                         fields["cube"] = value
                     elif key in ("收藏品", "珍藏品"):
                         fields["collection"] = value
+                    elif key in ("强度", "强度评级"):
+                        fields["strength"] = value
                     matched = True
                     break
             if not matched and text and not any(k in text for k in FIELD_LABELS):

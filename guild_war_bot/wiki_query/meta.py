@@ -56,6 +56,9 @@ def format_meta_text(meta: dict[str, dict[str, Any]], query: str) -> str | None:
     tier = rec.get("tier")
     if tier:
         lines.append(f"强度评级：{tier}")
+    strength = rec.get("strength")
+    if strength:
+        lines.append(f"强度：{strength}")
     skill = rec.get("skill")
     if skill:
         lines.append(f"技能加点：{skill}")
