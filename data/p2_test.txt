@@ -1,2 +1,0 @@
-﻿49 passed, 3 skipped in 7.14s
-BRIDGE OK

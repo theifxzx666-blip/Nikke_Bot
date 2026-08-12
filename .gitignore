@@ -59,3 +59,15 @@ data/astrbot_restart.txt
 data/astrbot_start.txt
 data/plugin_reload.txt
 data/_p2_probe*.py
+data/*_test.txt
+data/cleanup*.txt
+data/final_clean.txt
+data/full_restart.txt
+data/kill_*.txt
+data/ps_call.txt
+data/qq_*.txt
+data/script_test*.txt
+data/switch_account.txt
+data/sync_test.txt
+data/taskkill.txt
+data/win_check.txt

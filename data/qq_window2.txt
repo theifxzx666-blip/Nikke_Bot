@@ -1,5 +1,0 @@
-﻿窗口标题: 退出
-内存: 20.4 MB
-Responding: True
-48356 | 退出 | 20.4MB | resp=True
-3360 |  | 68.1MB | resp=True
