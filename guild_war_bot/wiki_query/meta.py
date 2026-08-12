@@ -53,21 +53,22 @@ def format_meta_text(meta: dict[str, dict[str, Any]], query: str) -> str | None:
     if rec is None:
         return None
     lines = [f"【{rec.get('name', query)}】培养建议"]
-    tier = rec.get("tier")
-    if tier:
-        lines.append(f"强度评级：{tier}")
-    strength = rec.get("strength")
+    # 输出顺序对齐录入规范：强度→装备→词条→备注→技能→魔方→收藏品
+    strength = rec.get("strength") or rec.get("tier")
     if strength:
         lines.append(f"强度：{strength}")
-    skill = rec.get("skill")
-    if skill:
-        lines.append(f"技能加点：{skill}")
     gear = rec.get("gear")
     if gear:
         lines.append(f"装备：{gear}")
     gear_stat = rec.get("gear_stat")
     if gear_stat:
         lines.append(f"词条：{gear_stat}")
+    note = rec.get("note")
+    if note:
+        lines.append(f"备注：{note}")
+    skill = rec.get("skill")
+    if skill:
+        lines.append(f"技能：{skill}")
     cube = rec.get("cube")
     if cube:
         lines.append(f"魔方：{cube}")
@@ -76,10 +77,7 @@ def format_meta_text(meta: dict[str, dict[str, Any]], query: str) -> str | None:
         lines.append(f"收藏品：{collection}")
     team = rec.get("team")
     if team:
-        lines.append(f"配队推荐：{team}")
-    note = rec.get("note")
-    if note:
-        lines.append(f"备注：{note}")
+        lines.append(f"配队：{team}")
     return "\n".join(lines)
 
 

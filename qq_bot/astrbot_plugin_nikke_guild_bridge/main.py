@@ -190,7 +190,7 @@ class NikkeGuildBridgePlugin(Star):
 
     def _may_have_async_outputs(self, text: str, reply: Any) -> bool:
         normalized = text.lstrip("/／").strip()
-        # 会发图的命令：会战进度截图、角色卡立绘、wiki 查询等
+        # 会发图的命令：会战进度截图、角色卡立绘、养成建议截图、wiki 查询等
         if normalized.startswith(
             (
                 "会战进度查询",
@@ -201,6 +201,12 @@ class NikkeGuildBridgePlugin(Star):
                 "角色卡",
                 "是谁",
                 "wiki",
+                "养成",
+                "养成建议",
+                "培养",
+                "培养建议",
+                "加点",
+                "怎么培养",
                 "查 ",
             )
         ):

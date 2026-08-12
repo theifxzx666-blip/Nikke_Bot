@@ -88,13 +88,21 @@ class NikkeWikiSkill:
         return text
 
     def _send_meta_crop(self, name: str, context: SkillContext) -> None:
-        """发送角色在屑夫蒂一图流中的原图区块（立绘+养成方案）。"""
+        """发送角色在屑夫蒂一图流中的原图区块（调试期方便核对）。"""
         if context.reply is None or not META_CROP_DIR.exists():
             return
         # 文件名安全化（与 build_character_meta.py 一致）
         import re as _re
         safe = _re.sub(r'[\\/:*?"<>|]', "", name)
         path = META_CROP_DIR / f"{safe}.png"
+        if not path.exists():
+            # normalize_query 会去掉冒号等标点，文件名可能保留（如 红莲：暗影.png）
+            norm = "".join(ch for ch in name if ch.isalnum() or "\u4e00" <= ch <= "\u9fff")
+            for p in META_CROP_DIR.glob("*.png"):
+                p_norm = "".join(ch for ch in p.stem if ch.isalnum() or "\u4e00" <= ch <= "\u9fff")
+                if p_norm == norm:
+                    path = p
+                    break
         if not path.exists():
             return
         try:
