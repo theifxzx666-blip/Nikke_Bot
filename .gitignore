@@ -80,3 +80,5 @@ data/_wechat_ocr_pkg/
 data/_ocr_*
 data/_wechat_ocr_pkg/
 data/wechat_*.txt
+data/meta_crops/
+data/_ocr_work/

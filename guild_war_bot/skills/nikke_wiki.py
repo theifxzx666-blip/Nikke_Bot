@@ -21,6 +21,9 @@ from .base import IncomingMessage, SkillContext
 _ROLE_KEYWORDS: tuple[str, ...] = ("角色", "查角色", "角色卡", "是谁")
 _WIKI_KEYWORDS: tuple[str, ...] = ("wiki", "查")
 _META_KEYWORDS: tuple[str, ...] = ("培养", "培养建议", "加点", "怎么培养")
+# /角色 <名> 养成 → 在角色名后追加"养成"后缀时进入"角色卡+培养建议"合并模式
+_META_SUFFIXES: tuple[str, ...] = ("养成", "培养", "培养建议")
+META_CROP_DIR = Path(__file__).resolve().parents[2] / "data" / "meta_crops"
 
 
 class NikkeWikiSkill:
@@ -63,17 +66,17 @@ class NikkeWikiSkill:
         return None
 
     def _handle_role(self, arg: str, context: SkillContext) -> str:
-        query = normalize_query(arg)
+        # 调试阶段：/角色 <名> 养成 → 角色卡 + 培养建议 + 原图区块截图
+        query, with_meta = _strip_meta_suffix(arg)
         if not query:
-            return "用法：/角色 <名字>，例如 /角色 红莲"
+            return "用法：/角色 <名字>，例如 /角色 红莲；调试期可加 \"养成\" 获取培养建议"
         index = self._get_index()
         rec = index.lookup(query)
         if rec is None:
-            # P2：本地未命中 -> GameKee 在线兜底
-            return self._handle_online(query, context)
-        return self._reply_with_portrait(rec, context)
+            return self._handle_online(query, context, with_meta=with_meta)
+        return self._reply_with_portrait(rec, context, with_meta=with_meta)
 
-    def _handle_meta(self, arg: str) -> str:
+    def _handle_meta(self, arg: str, context: SkillContext) -> str:
         """培养建议查询（屑夫蒂一图流 P3）。"""
         from ..wiki_query.meta import format_meta_text, load_meta, missing_text
 
@@ -84,7 +87,24 @@ class NikkeWikiSkill:
         text = format_meta_text(meta, query)
         if text is None:
             return missing_text(query)
+        # 调试阶段：附带原图区块截图
+        self._send_meta_crop(query, context)
         return text
+
+    def _send_meta_crop(self, name: str, context: SkillContext) -> None:
+        """发送角色在屑夫蒂一图流中的原图区块（立绘+养成方案）。"""
+        if context.reply is None or not META_CROP_DIR.exists():
+            return
+        # 文件名安全化（与 build_character_meta.py 一致）
+        import re as _re
+        safe = _re.sub(r'[\\/:*?"<>|]', "", name)
+        path = META_CROP_DIR / f"{safe}.png"
+        if not path.exists():
+            return
+        try:
+            context.reply.send_image(path)
+        except Exception:
+            pass
 
     def _handle_wiki(self, arg: str, context: SkillContext) -> str:
         query = normalize_query(arg)
@@ -97,7 +117,7 @@ class NikkeWikiSkill:
             return self._handle_online(query, context)
         return self._reply_with_portrait(rec, context)
 
-    def _handle_online(self, query: str, context: SkillContext) -> str:
+    def _handle_online(self, query: str, context: SkillContext, with_meta: bool = False) -> str:
         """GameKee 在线兜底：搜索角色、拉取技能、下载立绘并发送。"""
         from ..wiki_query.online import (
             download_portrait,
@@ -140,9 +160,14 @@ class NikkeWikiSkill:
             parts.append(profile)
         parts.append("")
         parts.append(format_skills_text(skills))
-        return "\n".join(parts)
+        text = "\n".join(parts)
+        if with_meta:
+            text = self._append_meta_block(text, name, context)
+        return text
 
-    def _reply_with_portrait(self, rec: dict, context: SkillContext) -> str:
+    def _reply_with_portrait(
+        self, rec: dict, context: SkillContext, with_meta: bool = False
+    ) -> str:
         """返回角色卡文本（含技能组与珍藏品），并尝试发送本地立绘。"""
         parts = [summarize_character(self._get_index(), rec)]
         fav = fetch_favorite_item(rec)
@@ -161,4 +186,31 @@ class NikkeWikiSkill:
             except Exception:
                 # 立绘发送失败不阻断文本回复
                 pass
+        if with_meta:
+            text = self._append_meta_block(text, rec.get("cnName") or rec.get("name") or "", context)
         return text
+
+    def _append_meta_block(self, base_text: str, name: str, context: SkillContext) -> str:
+        """在角色卡文本后追加培养建议（调试阶段同时发原图区块截图）。"""
+        from ..wiki_query.meta import format_meta_text, load_meta
+
+        meta = load_meta()
+        rec = format_meta_text(meta, name)
+        if rec:
+            base_text = base_text + "\n\n" + rec
+        self._send_meta_crop(name, context)
+        return base_text
+
+
+def _strip_meta_suffix(arg: str) -> tuple[str, bool]:
+    """从 /角色 参数尾部去掉"养成/培养"后缀，返回 (角色名, 是否携带培养建议)."""
+    q = arg.strip()
+    if not q:
+        return "", False
+    # 去掉可能出现的空格 + 后缀
+    for suf in _META_SUFFIXES:
+        if q.endswith(suf):
+            stripped = q[: -len(suf)].rstrip()
+            if stripped:
+                return stripped, True
+    return q, False
