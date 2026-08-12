@@ -61,7 +61,16 @@ def format_meta_text(meta: dict[str, dict[str, Any]], query: str) -> str | None:
         lines.append(f"技能加点：{skill}")
     gear = rec.get("gear")
     if gear:
-        lines.append(f"装备词条：{gear}")
+        lines.append(f"装备：{gear}")
+    gear_stat = rec.get("gear_stat")
+    if gear_stat:
+        lines.append(f"词条：{gear_stat}")
+    cube = rec.get("cube")
+    if cube:
+        lines.append(f"魔方：{cube}")
+    collection = rec.get("collection")
+    if collection:
+        lines.append(f"收藏品：{collection}")
     team = rec.get("team")
     if team:
         lines.append(f"配队推荐：{team}")

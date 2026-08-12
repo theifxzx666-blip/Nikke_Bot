@@ -1,0 +1,5 @@
+﻿注册表: "E:\[Chat]Tencent\Weixin"
+E:\[Chat]Tencent\QQPCMgr\18.3.30969.301\mmmojo_64.dll
+E:\[Chat]Tencent\QQPCMgr\18.3.30969.301\Qt64\mmmojo_64.dll
+E:\[Chat]Tencent\Weixin\4.1.12.55\mmmojo_64.dll
+--- done ---

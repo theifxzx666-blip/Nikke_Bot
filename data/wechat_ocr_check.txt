@@ -1,0 +1,3 @@
+﻿进程路径: C:\Users\Administrator\AppData\Roaming\Tencent\xwechat\xplugin\plugins\RadiumWMPF\25364\extracted\runtime\WeChatAppEx.exe
+未找到 WeChatOCR 组件
+done

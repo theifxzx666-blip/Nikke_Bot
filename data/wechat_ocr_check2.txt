@@ -1,0 +1,26 @@
+﻿xwechat 目录存在
+=== WeChatOCR 组件 ===
+C:\Users\Administrator\AppData\Roaming\Tencent\xwechat\xplugin\info\plugin_schedule_info_WeChatOcr
+C:\Users\Administrator\AppData\Roaming\Tencent\xwechat\xplugin\info\plugin_schedule_info_WeChatOcr.crc
+C:\Users\Administrator\AppData\Roaming\Tencent\xwechat\xplugin\info\plugin_version_info_WeChatOcr
+C:\Users\Administrator\AppData\Roaming\Tencent\xwechat\xplugin\info\plugin_version_info_WeChatOcr.crc
+C:\Users\Administrator\AppData\Roaming\Tencent\xwechat\xplugin\plugins\WeChatOcr
+C:\Users\Administrator\AppData\Roaming\Tencent\xwechat\xplugin\plugins\WeChatOcr\8092\extracted\wxocr.dll
+=== WeChatOCR* 精确 ===
+C:\Users\Administrator\AppData\Roaming\Tencent\xwechat\xplugin\plugins\WeChatOcr
+=== xwechat 顶层 ===
+All Users
+config
+crashinfo
+ilink
+log
+login
+net
+net_1
+net_2
+net_3
+radium
+uh
+update
+xplugin
+done

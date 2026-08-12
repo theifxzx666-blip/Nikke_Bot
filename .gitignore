@@ -75,3 +75,7 @@ data/skill_test_result.txt
 data/_check_*.py
 data/online_portraits/
 data/_build_*.py
+data/_ocr_*
+data/_wechat_ocr_pkg/
+data/_ocr_*
+data/_wechat_ocr_pkg/
