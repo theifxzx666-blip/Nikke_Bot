@@ -1,0 +1,34 @@
+﻿27220 | QQ | "E:/[Chat]Tencent/QQNT/QQ.exe" --enable-logging
+48356 | QQ | "E:/[Chat]Tencent/QQNT/QQ.exe" --enable-logging
+3360 | QQPCRTP | "E:\[Chat]Tencent\QQPCMgr\18.3.30969.301\QQPCRtp.exe" -r
+taskkill : 错误: 无法终止 PID 27220 (属于 PID 54452 子进程)的进程。
+所在位置 行:452 字符: 9
++         taskkill /PID $p.Id /T /F 2>&1 | Out-File $out -Append -Encod ...
++         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (错误: 无法终止 PID 27... 54452 子进程)的进程。 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+原因: 没有此任务的实例在运行。
+
+taskkill : 错误: 无法终止 PID 48356 (属于 PID 50500 子进程)的进程。
+所在位置 行:452 字符: 9
++         taskkill /PID $p.Id /T /F 2>&1 | Out-File $out -Append -Encod ...
++         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (错误: 无法终止 PID 48... 50500 子进程)的进程。 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+原因: 没有此任务的实例在运行。
+
+taskkill : 错误: 无法终止 PID 3360 (属于 PID 1000 子进程)的进程。
+所在位置 行:452 字符: 9
++         taskkill /PID $p.Id /T /F 2>&1 | Out-File $out -Append -Encod ...
++         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (错误: 无法终止 PID 3360 (属于 PID 1000 子进 
+   程)的进程。:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+原因: 拒绝访问。
+
+FINAL残留: 27220,48356,3360

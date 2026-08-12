@@ -1,0 +1,6 @@
+﻿STOP 23464 (:::6099)
+STOP 50328 (:::6099)
+STOP 35424 (:::6099)
+6099 FREE (iteration 3)
+FINAL: 6099 FREE
+done

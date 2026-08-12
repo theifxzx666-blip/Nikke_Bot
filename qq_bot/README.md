@@ -214,3 +214,30 @@ astrbot_plugin_nikke_guild_bridge/
 - AstrBot 文档：`https://docs.astrbot.app/`
 - AstrBot OneBot v11 文档入口：`https://docs.astrbot.app/platform/aiocqhttp`
 - AstrBot 插件开发入口：`https://docs.astrbot.app/dev/star/plugin-new`
+
+## NapCat 掉线 / 快速登录处理（2026-08-12 实战记录）
+
+### 现象判断
+
+- **假在线**：进程还在、`6099`/`6199` 端口在，但机器人不回消息 → QQ 登录态失效（腾讯踢号/过期），NapCat 收不到也不上报新消息。
+- **真掉线**：`6099` 不再监听 → NapCat/QQ 进程没了，需要重启。
+
+### 快速登录的正确方式
+
+**用官方脚本**（不要手动起 `NapCatWinBootMain.exe`）：
+
+```bat
+supports\NapCat.Shell.Windows.OneKey\launcher-win10-user.bat 1255348850
+```
+
+要点：
+
+1. `autoLoginAccount` 已配置为 `1255348850`（`webui.json`），NapCat 启动时**自动快速登录**该账号，无需手动传 `-q`。
+2. NapCat 会检测本机可快速登录的账号列表并自动选择小号（日志可见：`自动快速登录成功: 1255348850`）。
+3. **NapCat 小号数据目录在 D 盘**：`D:\Software Datas\Tencent Files\Tencent Files\NapCat\data`（不是 C 盘 QQ 目录，排查凭证时别找错）。
+
+### 常见坑
+
+- 手动执行 exe 注入会导致残留僵尸 QQ 进程（约 20MB、杀不掉、窗口标题"退出"），卡死后续启动 → 优先用官方 bat，别手动起 exe。
+- 若出现多个 `NapCatWinBootMain.exe` 实例，先全部停掉再启动一个。
+- 快速登录失败需重新扫码时：`launcher-win10-user.bat`（不带参数）会弹二维码窗口，扫码后凭证落盘，之后自动快速登录恢复。

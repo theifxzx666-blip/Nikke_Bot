@@ -1,0 +1,4 @@
+﻿46284: QQ.exe | E:\[Chat]Tencent\QQNT\QQ.exe
+STOP 46284
+6099 STILL (PID=23464)
+done

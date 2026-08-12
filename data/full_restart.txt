@@ -1,0 +1,3 @@
+﻿STOP QQ PID=48704
+6099 FREE
+done

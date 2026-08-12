@@ -1,0 +1,3 @@
+﻿UninstallString: "E:\[Chat]Tencent\QQNT\Uninstall.exe"
+QQ Path: "E:\[Chat]Tencent\QQNT\QQ.exe
+Exists: False
