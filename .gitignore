@@ -84,3 +84,4 @@ data/meta_crops/
 data/_ocr_work/
 data/_probe.py
 data/_alias_check.py
+data/*_reload.txt
