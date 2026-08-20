@@ -436,6 +436,76 @@ function bindEvents() {
       await api("/api/open_browser", { method: "POST", body: {} });
     } catch (e) { /* ignore */ }
   });
+
+  // ---- 系统工具 ----
+  $("#btnInstallDeps").addEventListener("click", async () => {
+    try {
+      const data = await api("/api/system/install_deps", { method: "POST", body: {} });
+      toast(data.message || "已启动", data.ok ? "success" : "error");
+    } catch (e) { toast(e.message, "error"); }
+  });
+
+  $("#btnShowQrcode").addEventListener("click", () => showQrcodeModal());
+  $("#btnShowLogs").addEventListener("click", () => showLogsModal());
+  $("#toolModalClose").addEventListener("click", () => { $("#toolModal").hidden = true; $("#toolModalRefresh").hidden = true; });
+  $("#toolModalRefresh").addEventListener("click", () => {
+    const kind = $("#toolModalRefresh").dataset.kind;
+    if (kind === "qrcode") showQrcodeModal();
+    else if (kind === "logs") showLogsModal();
+  });
+}
+
+/* ---------- 系统工具弹窗 ---------- */
+function openToolModal(title, bodyHTML, refreshKind = null) {
+  $("#toolModalTitle").textContent = title;
+  $("#toolModalBody").innerHTML = bodyHTML;
+  $("#toolModalRefresh").hidden = !refreshKind;
+  if (refreshKind) $("#toolModalRefresh").dataset.kind = refreshKind;
+  $("#toolModal").hidden = false;
+}
+
+async function showQrcodeModal() {
+  try {
+    const info = await api("/api/qrcode/status");
+    if (!info.exists) {
+      openToolModal("登录二维码",
+        `<p class="tool-hint">NapCat 二维码尚未生成。请先启动 NapCat，扫码登录后刷新查看。</p>`,
+        "qrcode");
+      return;
+    }
+    openToolModal("登录二维码",
+      `<p class="tool-hint">用手机 QQ 扫描下方二维码登录机器人账号（更新于 ${info.mtime_text || "?"}，如已失效点"刷新"）</p>
+       <img class="qrcode-img" src="/api/qrcode/image?ts=${Date.now()}" alt="NapCat 登录二维码">`,
+      "qrcode");
+  } catch (e) { toast(e.message, "error"); }
+}
+
+async function showLogsModal() {
+  try {
+    const data = await api("/api/system/logs");
+    const names = Object.keys(data.logs || {});
+    if (!names.length) {
+      openToolModal("查看日志", `<p class="tool-hint">暂无日志文件</p>`);
+      return;
+    }
+    const tabs = names.map((n, i) =>
+      `<button class="btn btn-ghost ${i === 0 ? "active" : ""}" data-log-tab="${n}">${n}</button>`).join("");
+    const boxes = names.map((n, i) =>
+      `<pre class="log-box" data-log-box="${n}" ${i === 0 ? "" : "hidden"}>${escapeHtml((data.logs[n] || []).join("\n"))}</pre>`).join("");
+    openToolModal("查看日志", `<div class="log-tabs">${tabs}</div>${boxes}`, "logs");
+    $$("[data-log-tab]").forEach((btn) => btn.addEventListener("click", () => {
+      $$("[data-log-tab]").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      const n = btn.dataset.logTab;
+      $$("[data-log-box]").forEach((b) => { b.hidden = b.dataset.logBox !== n; });
+    }));
+  } catch (e) { toast(e.message, "error"); }
+}
+
+function escapeHtml(s) {
+  return String(s || "").replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  })[c]);
 }
 
 /* ---------- 轮询 ---------- */

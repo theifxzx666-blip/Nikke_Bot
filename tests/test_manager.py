@@ -84,20 +84,16 @@ class ManagerTests(unittest.TestCase):
             thread.join(timeout=3)
 
     def test_start_http_skips_an_occupied_port(self) -> None:
+        # 单实例模式：默认端口已被监听即视为已有实例，start_http 返回 None（不再顺延开新实例）
         occupied = ThreadingHTTPServer(("127.0.0.1", 0), manager.Handler)
         occupied_thread = threading.Thread(target=occupied.serve_forever, daemon=True)
         occupied_thread.start()
         original_port = manager.HTTP_PORT
-        started = None
         try:
             manager.HTTP_PORT = occupied.server_port
             started = manager.start_http()
-            self.assertNotEqual(started.server_port, occupied.server_port)
-            self.assertGreater(started.server_port, occupied.server_port)
+            self.assertIsNone(started, "端口被占时单实例模式应返回 None")
         finally:
-            if started is not None:
-                started.shutdown()
-                started.server_close()
             occupied.shutdown()
             occupied.server_close()
             occupied_thread.join(timeout=3)

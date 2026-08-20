@@ -127,6 +127,20 @@
             <h3>历史记录</h3>
             <div id="opsEvents" class="event-list"></div>
           </div>
+          <div class="card">
+            <h3>系统工具</h3>
+            <div class="tool-actions">
+              <button class="btn btn-ghost" id="btnInstallDeps">安装依赖</button>
+              <button class="btn btn-ghost" id="btnShowQrcode">查看登录二维码</button>
+              <button class="btn btn-ghost" id="btnShowLogs">查看日志</button>
+            </div>
+            <div class="tool-actions" style="margin-top:10px">
+              <button class="btn btn-ghost" data-open-service="astrbot">AstrBot 后台</button>
+              <button class="btn btn-ghost" data-open-service="napcat">NapCat WebUI</button>
+              <button class="btn btn-ghost" data-open-service="admin">成员后台</button>
+              <button class="btn btn-ghost" data-open-service="bridge">桥接健康页</button>
+            </div>
+          </div>
         </section>
 
         <!-- 配置 -->
@@ -179,6 +193,18 @@
         <button class="btn btn-primary" type="submit">添加</button>
       </div>
     </form>
+  </div>
+
+  <!-- 系统工具弹窗（二维码 / 日志） -->
+  <div class="modal-mask" id="toolModal" hidden>
+    <div class="modal modal-wide">
+      <h3 id="toolModalTitle">系统工具</h3>
+      <div class="modal-body" id="toolModalBody"></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="toolModalRefresh" hidden>刷新</button>
+        <button class="btn btn-ghost" id="toolModalClose">关闭</button>
+      </div>
+    </div>
   </div>
 
   <div id="toast" class="toast"></div>

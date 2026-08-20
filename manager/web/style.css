@@ -272,9 +272,27 @@ body {
   border: 1px solid var(--border); border-radius: var(--radius);
   padding: 22px;
 }
+.modal.modal-wide { width: 760px; max-width: 92vw; }
 .modal h3 { margin-bottom: 16px; }
 .modal-body .form { gap: 12px; }
 .modal-actions { display: flex; gap: 10px; margin-top: 18px; justify-content: flex-end; }
+
+/* ---- 系统工具 ---- */
+.tool-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.qrcode-img {
+  max-width: 320px; max-height: 320px; display: block; margin: 0 auto;
+  border-radius: var(--radius-sm); border: 1px solid var(--border);
+}
+.log-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.log-tabs button.active { background: var(--primary); color: #fff; }
+.log-box {
+  max-height: 320px; overflow: auto;
+  background: rgba(17,24,39,.9); color: #d1d5db;
+  border-radius: var(--radius-sm); padding: 12px;
+  font-family: Consolas, "Courier New", monospace; font-size: 12px;
+  line-height: 1.55; white-space: pre-wrap; word-break: break-all;
+}
+.tool-hint { font-size: 13px; color: var(--text-2); margin-bottom: 10px; text-align: center; }
 
 /* ---- Toast ---- */
 .toast {

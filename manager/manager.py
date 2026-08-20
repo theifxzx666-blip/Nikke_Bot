@@ -39,6 +39,8 @@ CONFIG_PATH = BASE_DIR / "manager_config.json"
 LOG_PATH = BASE_DIR / "manager.log"
 BG_FILE = BG_DIR / "bg.png"
 LOGS_DIR = BASE_DIR / "manager_logs"        # 服务静默启动后的日志落地目录
+QRCODE_PATH = PROJECT_ROOT / "supports" / "NapCat.Shell.Windows.OneKey" / "cache" / "qrcode.png"  # NapCat 扫码二维码
+INSTALL_BAT = PROJECT_ROOT / "qq_bot" / "01-install-env.bat"  # 首次依赖安装脚本
 HTTP_PORT = int(os.environ.get("NIKKE_MANAGER_PORT", "8899"))
 
 # 静默启动：CREATE_NO_WINDOW，服务不弹 cmd 窗口；日志通过 stdout/stderr 重定向到文件
@@ -235,6 +237,43 @@ def _hidden_run(args: list, **kwargs):
     """隐藏窗口运行外部命令（仅作兜底；检测主体走 psutil，不弹 cmd 窗口）"""
     kwargs.setdefault("creationflags", SILENT_FLAG)
     return subprocess.run(args, **kwargs)
+
+
+def read_logs_tail(n: int = 50) -> dict:
+    """读取 manager.log 与 manager_logs/*.log 各文件尾部 n 行（供客户端查看日志）。"""
+    files: list[Path] = [LOG_PATH]
+    if LOGS_DIR.is_dir():
+        files += sorted(LOGS_DIR.glob("*.log"))
+    out: dict[str, list[str]] = {}
+    for f in files:
+        if not f.is_file():
+            continue
+        try:
+            lines = f.read_text(encoding="utf-8", errors="replace").splitlines()[-n:]
+            out[f.name] = lines
+        except OSError:
+            continue
+    return out
+
+
+def system_install_deps() -> tuple[bool, str]:
+    """静默执行首次依赖安装（qq_bot/01-install-env.bat），输出重定向到 manager_logs/install.log。"""
+    if not INSTALL_BAT.is_file():
+        return False, f"未找到安装脚本: {INSTALL_BAT}"
+    LOGS_DIR.mkdir(parents=True, exist_ok=True)
+    logf = open(LOGS_DIR / "install.log", "ab")
+    try:
+        subprocess.Popen(
+            [str(INSTALL_BAT)],
+            cwd=str(INSTALL_BAT.parent),
+            creationflags=SILENT_FLAG,
+            stdout=logf,
+            stderr=subprocess.STDOUT,
+            close_fds=True,
+        )
+        return True, "已静默启动依赖安装，日志: install.log"
+    except OSError as exc:
+        return False, f"启动安装失败: {exc}"
 
 
 def check_tcp_established(port: int) -> bool:
@@ -753,6 +792,36 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/export":
             self._send_json({"config": _config})
             return
+        if path == "/api/qrcode/status":
+            # NapCat 扫码登录二维码状态
+            import datetime as _dt
+            info = {
+                "exists": QRCODE_PATH.is_file(),
+                "mtime": None,
+                "mtime_text": "",
+            }
+            if QRCODE_PATH.is_file():
+                ts = QRCODE_PATH.stat().st_mtime
+                info["mtime"] = ts
+                info["mtime_text"] = _dt.datetime.fromtimestamp(ts).strftime("%H:%M:%S")
+            self._send_json(info)
+            return
+        if path == "/api/qrcode/image":
+            # 返回二维码图片（供客户端弹窗展示）
+            if QRCODE_PATH.is_file():
+                body = QRCODE_PATH.read_bytes()
+                self.send_response(200)
+                self.send_header("Content-Type", "image/png")
+                self.send_header("Cache-Control", "no-store")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+            else:
+                self.send_error(404, "二维码尚未生成")
+            return
+        if path == "/api/system/logs":
+            self._send_json({"logs": read_logs_tail(50)})
+            return
         self.send_error(404)
 
     def do_POST(self) -> None:
@@ -816,6 +885,10 @@ class Handler(BaseHTTPRequestHandler):
             _config = json.loads(json.dumps(DEFAULT_CONFIG))
             save_config()
             self._send_json({"ok": True})
+            return
+        if path == "/api/system/install_deps":
+            ok, message = system_install_deps()
+            self._send_json({"ok": ok, "message": message})
             return
         if path == "/api/open_browser":
             webbrowser.open(f"http://127.0.0.1:{HTTP_PORT}")
