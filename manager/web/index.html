@@ -67,6 +67,7 @@
               <button class="btn btn-primary" data-service-action="start" data-service="all">全部启动</button>
               <button class="btn btn-warn" data-service-action="restart" data-service="all">全部重启</button>
               <button class="btn btn-danger" data-service-action="stop" data-service="all">全部停止</button>
+              <button class="btn btn-ghost" id="btnRefreshStatus" title="立即重新检测各服务状态">刷新状态</button>
             </div>
           </div>
           <div class="card-grid" id="dashboardCards"></div>
@@ -204,6 +205,14 @@
         <button class="btn btn-ghost" id="toolModalRefresh" hidden>刷新</button>
         <button class="btn btn-ghost" id="toolModalClose">关闭</button>
       </div>
+    </div>
+  </div>
+
+  <!-- 操作进度弹窗（启停/重启流式日志） -->
+  <div class="modal-mask" id="loadingModal" hidden>
+    <div class="modal">
+      <h3 id="loadingTitle">正在执行</h3>
+      <div class="loading-log" id="loadingLog"></div>
     </div>
   </div>
 

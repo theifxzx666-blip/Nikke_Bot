@@ -201,21 +201,71 @@ function renderOpsStatus() {
 
 /* ---------- 服务动作 ---------- */
 async function runServiceAction(service, action) {
-  toast("正在" + (action === "start" ? "启动" : action === "stop" ? "停止" : "重启") + "：" + service, "info");
+  const actionZh = action === "start" ? "启动" : action === "stop" ? "停止" : "重启";
+  const label = service === "all" ? "全部服务" : service;
+  toast("正在" + actionZh + "：" + label, "info");
   try {
     const data = await api("/api/services/" + action, {
       method: "POST", body: { service },
     });
-    toast("操作完成", data.ok ? "success" : "error");
+    if (data.task_id) {
+      // 打开进度弹窗，轮询任务日志（类似思考过程的实时展示）
+      openLoading(actionZh + label);
+      pollTask(data.task_id);
+    } else {
+      toast("操作完成", data.ok ? "success" : "error");
+      setTimeout(pollStatus, 800);
+    }
   } catch (e) {
     toast(e.message, "error");
   }
-  // 操作完成后刷新状态；停止操作额外多刷几次（进程退出需时间，让状态尽快跟上）
-  setTimeout(pollStatus, 800);
-  if (action === "stop") {
-    for (let i = 1; i <= 4; i++) {
-      setTimeout(pollStatus, 800 + i * 2000);
+}
+
+/* ---------- 操作进度弹窗（任务流式日志） ---------- */
+let taskPollTimer = null;
+
+function openLoading(title) {
+  $("#loadingTitle").textContent = title;
+  $("#loadingLog").innerHTML = "";
+  $("#loadingModal").hidden = false;
+}
+
+function closeLoading() {
+  $("#loadingModal").hidden = true;
+  clearTimeout(taskPollTimer);
+}
+
+async function pollTask(taskId) {
+  try {
+    const d = await api("/api/tasks/" + taskId);
+    const box = $("#loadingLog");
+    const msgs = d.messages || [];
+    const rendered = box.querySelectorAll(".item").length;
+    for (let i = rendered; i < msgs.length; i++) {
+      const div = document.createElement("div");
+      div.className = "item";
+      div.textContent = msgs[i];
+      box.appendChild(div);
     }
+    // 最新一条高亮为"当前进行中"
+    box.querySelectorAll(".item").forEach((el) => el.classList.remove("current"));
+    const last = box.lastElementChild;
+    if (last) last.classList.add("current");
+    box.scrollTop = box.scrollHeight;
+    if (d.done) {
+      closeLoading();
+      toast("操作完成", d.ok ? "success" : "error");
+      // 刷新状态（进程退出/启动需要时间，多刷几次让状态跟上）
+      setTimeout(pollStatus, 800);
+      for (let i = 1; i <= 4; i++) {
+        setTimeout(pollStatus, 800 + i * 2000);
+      }
+      return;
+    }
+    taskPollTimer = setTimeout(() => pollTask(taskId), 500);
+  } catch (e) {
+    closeLoading();
+    toast(e.message, "error");
   }
 }
 
@@ -435,6 +485,13 @@ function bindEvents() {
     try {
       await api("/api/open_browser", { method: "POST", body: {} });
     } catch (e) { /* ignore */ }
+  });
+
+  // 手动刷新状态
+  $("#btnRefreshStatus").addEventListener("click", async () => {
+    toast("正在刷新服务状态 ...", "info");
+    await pollStatus();
+    toast("状态已刷新", "success");
   });
 
   // ---- 系统工具 ----

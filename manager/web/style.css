@@ -294,6 +294,19 @@ body {
 }
 .tool-hint { font-size: 13px; color: var(--text-2); margin-bottom: 10px; text-align: center; }
 
+/* ---- 操作进度弹窗 ---- */
+.loading-log {
+  max-height: 260px; overflow-y: auto;
+  background: rgba(17, 24, 39, .92); color: #d1d5db;
+  border-radius: var(--radius-sm); padding: 12px;
+  font-family: Consolas, "Courier New", monospace; font-size: 12px;
+  line-height: 1.6;
+}
+.loading-log .item { padding: 1px 0; }
+.loading-log .item.current { color: #7dd3fc; font-weight: 600; }
+.loading-log .item.done { color: #86efac; }
+.loading-log .item.fail { color: #fca5a5; }
+
 /* ---- Toast ---- */
 .toast {
   position: fixed; top: 20px; right: 20px; z-index: 200;

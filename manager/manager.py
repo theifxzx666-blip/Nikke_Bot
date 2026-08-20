@@ -393,7 +393,7 @@ def kill_napcat_tree() -> bool:
             if _name(proc) == "napcatwinbootmain.exe":
                 napcat_procs.append(proc)
                 for child in proc.children(recursive=True):
-                    qq_pids.add(child.info["pid"])
+                    qq_pids.add(child.pid)  # children() 返回 psutil.Process，用 .pid（无 .info）
         except psutil.Error:
             pass
 
@@ -453,11 +453,13 @@ def _refresh_all_status() -> None:
         _refresh_status(name)
 
 
-def start_service(name: str, wait: bool = True) -> bool:
+def start_service(name: str, wait: bool = True, progress: object = None) -> bool:
     svc = SERVICES.get(name)
     if not svc or not svc.get("start"):
         return False
     spec = svc["start"]
+    if progress:
+        progress(f"正在启动 {svc['label']}，发出启动指令 ...")
     try:
         # 静默启动：不弹 cmd 窗口，stdout/stderr 重定向到 manager_logs/<name>.log
         LOGS_DIR.mkdir(parents=True, exist_ok=True)
@@ -474,11 +476,17 @@ def start_service(name: str, wait: bool = True) -> bool:
             )
         _add_event("start", name, f"已静默启动 {spec['cmd'][-1]}，日志: {log_path.name}" + ("，等待就绪" if wait else ""))
         logger.info("start %s: %s", name, spec["cmd"])
+        if progress:
+            progress(f"已发出启动指令 {spec['cmd'][-1]}，等待服务就绪 ...")
         # 守护自动重启时 wait=False：不阻塞守护主循环，就绪状态交给后续轮询更新
         if not wait:
             _refresh_status(name)
+            if progress:
+                progress(f"{svc['label']} 启动指令已发出（后台继续拉起）")
             return True
         ready = wait_service_ready(name)
+        if progress:
+            progress("服务已就绪" if ready else "等待超时，服务未就绪")
         if ready:
             _add_event("start", name, "服务已就绪")
             _refresh_status(name)
@@ -489,13 +497,17 @@ def start_service(name: str, wait: bool = True) -> bool:
     except OSError as exc:
         _add_event("error", name, f"启动失败: {exc}")
         logger.error("start %s 失败: %s", name, exc)
+        if progress:
+            progress(f"启动失败: {exc}")
         return False
 
 
-def stop_service(name: str) -> bool:
+def stop_service(name: str, progress: object = None) -> bool:
     svc = SERVICES.get(name)
     if not svc:
         return False
+    if progress:
+        progress(f"正在停止 {svc['label']} ...")
     stopped = False
     if name == "napcat":
         # 精准停止：只杀 NapCat 进程树（含机器人账号 QQ），不误杀用户自己登录的 QQ
@@ -505,6 +517,8 @@ def stop_service(name: str) -> bool:
     port = svc.get("stop_port")
     if port:
         stopped = kill_port(port) or stopped
+    if progress:
+        progress("正在检测是否有残余进程 ...")
     # kill 是异步的：等待进程真正退出（最多 8 秒），确保状态刷新准确
     deadline = time.monotonic() + 8
     while time.monotonic() < deadline:
@@ -513,17 +527,61 @@ def stop_service(name: str) -> bool:
         time.sleep(0.5)
     if check_service(svc)[0]:
         _add_event("error", name, "停止后服务仍在运行（进程未完全退出，可能需要强制结束）")
+        if progress:
+            progress("仍有进程未完全退出")
     else:
         _add_event("stop", name, "已停止")
+        if progress:
+            progress("已全部关闭")
     logger.info("stop %s", name)
     _refresh_status(name)
     return stopped
 
 
-def restart_service(name: str, reason: str = "手动", wait: bool = True) -> bool:
-    stop_service(name)
+def restart_service(name: str, reason: str = "手动", wait: bool = True, progress: object = None) -> bool:
+    if progress:
+        progress(f"正在重启 {SERVICES.get(name, {}).get('label', name)} ...")
+    stop_service(name, progress=progress)
     time.sleep(1)
-    return start_service(name, wait=wait)
+    return start_service(name, wait=wait, progress=progress)
+
+
+# ---------------- 任务进度（启停操作流式上报） ----------------
+# task_id -> {"messages": [...], "done": bool, "ok": bool}
+_tasks: dict[str, dict] = {}
+_task_seq = 0
+MAX_TASKS = 30  # 只保留最近 30 个任务
+
+
+def _make_task() -> str:
+    global _task_seq
+    with _lock:
+        _task_seq += 1
+        tid = f"t{int(time.time())}_{_task_seq}"
+        _tasks[tid] = {"messages": [], "done": False, "ok": True}
+        # 清理过旧任务，防止内存膨胀
+        while len(_tasks) > MAX_TASKS:
+            oldest = next(iter(_tasks))
+            if _tasks[oldest].get("done"):
+                del _tasks[oldest]
+            else:
+                break
+        return tid
+
+
+def _task_log(tid: str, msg: str) -> None:
+    with _lock:
+        t = _tasks.get(tid)
+        if t:
+            t["messages"].append(msg)
+
+
+def _task_finish(tid: str, ok: bool) -> None:
+    with _lock:
+        t = _tasks.get(tid)
+        if t:
+            t["done"] = True
+            t["ok"] = ok
 
 
 # ---------------- 事件 ----------------
@@ -822,6 +880,19 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/system/logs":
             self._send_json({"logs": read_logs_tail(50)})
             return
+        if path.startswith("/api/tasks/"):
+            tid = urllib.parse.unquote(path.split("/")[-1])
+            with _lock:
+                t = _tasks.get(tid)
+            if not t:
+                self._send_json({"ok": False, "message": "任务不存在或已过期"}, 404)
+                return
+            self._send_json({
+                "messages": list(t["messages"]),
+                "done": t["done"],
+                "ok": t["ok"],
+            })
+            return
         self.send_error(404)
 
     def do_POST(self) -> None:
@@ -961,34 +1032,63 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- 动作 ----
     def _svc_action(self, name: str, action: str) -> None:
+        """启停/重启服务。改为后台任务执行：立即返回 task_id，进度通过 /api/tasks/<id> 流式获取。"""
+        action_zh = {"start": "启动", "stop": "关闭", "restart": "重启"}.get(action, action)
         if name == "all":
             order = ["napcat", "astrbot", "bridge", "admin"]
             if action == "stop":
                 order = list(reversed(order))
-            results = {}
-            for n in order:
-                self._set_guard_state(n, action != "stop")
-                if action == "start":
-                    results[n] = start_service(n)
-                elif action == "stop":
-                    results[n] = stop_service(n)
-                else:
-                    results[n] = restart_service(n)
-            self._refresh_all_status()
-            self._send_json({"ok": True, "results": results})
+
+            def _worker_all(tid: str) -> None:
+                results = {}
+                for n in order:
+                    self._set_guard_state(n, action != "stop")
+                    label = SERVICES[n]["label"]
+                    _task_log(tid, f"正在{action_zh} {label} ...")
+                    try:
+                        if action == "start":
+                            results[n] = start_service(n, progress=lambda m, _n=n: _task_log(tid, m))
+                        elif action == "stop":
+                            results[n] = stop_service(n, progress=lambda m, _n=n: _task_log(tid, m))
+                        else:
+                            results[n] = restart_service(n, progress=lambda m, _n=n: _task_log(tid, m))
+                    except Exception as exc:  # noqa: BLE001
+                        results[n] = False
+                        _task_log(tid, f"{label} 操作异常: {exc}")
+                    _task_log(tid, f"{label} {action_zh}完成" if results[n] else f"{label} {action_zh}失败")
+                _task_log(tid, "正在刷新服务状态 ...")
+                _refresh_all_status()  # 模块级函数，Handler 无此方法
+                _task_log(tid, "已全部完成")
+                _task_finish(tid, all(results.values()))
+
+            tid = _make_task()
+            threading.Thread(target=_worker_all, args=(tid,), daemon=True).start()
+            self._send_json({"ok": True, "task_id": tid})
             return
         if name not in SERVICES:
             self._send_json({"ok": False, "message": "未知服务"}, 400)
             return
-        self._set_guard_state(name, action != "stop")
-        if action == "start":
-            ok = start_service(name)
-        elif action == "stop":
-            ok = stop_service(name)
-        else:
-            ok = restart_service(name)
-        self._refresh_all_status()
-        self._send_json({"ok": ok})
+
+        def _worker_single(tid: str) -> None:
+            self._set_guard_state(name, action != "stop")
+            try:
+                if action == "start":
+                    ok = start_service(name, progress=lambda m: _task_log(tid, m))
+                elif action == "stop":
+                    ok = stop_service(name, progress=lambda m: _task_log(tid, m))
+                else:
+                    ok = restart_service(name, progress=lambda m: _task_log(tid, m))
+            except Exception as exc:  # noqa: BLE001
+                ok = False
+                _task_log(tid, f"操作异常: {exc}")
+            _task_log(tid, "正在刷新服务状态 ...")
+            _refresh_all_status()  # 模块级函数，Handler 无此方法
+            _task_log(tid, "操作完成" if ok else "操作失败")
+            _task_finish(tid, ok)
+
+        tid = _make_task()
+        threading.Thread(target=_worker_single, args=(tid,), daemon=True).start()
+        self._send_json({"ok": True, "task_id": tid})
 
     @staticmethod
     def _set_guard_state(name: str, enabled: bool) -> None:
