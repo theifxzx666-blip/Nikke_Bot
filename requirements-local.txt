@@ -8,7 +8,8 @@ pyautogui
 pydirectinput
 pywin32; platform_system == "Windows"
 pytest
-# 屑夫蒂一图流 OCR 识别（tools/build_character_meta.py 录入用，纯本地离线）
+# 本地 OCR：角色资料录入和 QQ 机器人装备词条识别
 rapidocr-onnxruntime
-# 屑夫蒂一图流 OCR 识别（tools/build_character_meta.py 录入用，纯本地离线）
-rapidocr-onnxruntime
+# Windows 管理客户端内嵌 WebView2 窗口
+pywebview
+psutil

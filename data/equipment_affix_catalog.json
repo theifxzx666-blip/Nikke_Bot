@@ -1,0 +1,11 @@
+{
+  "攻击力": {"aliases": ["攻击", "攻擊力", "ATK"], "unit": "%", "tier_values": {}},
+  "防御力": {"aliases": ["防御", "防禦力", "DEF"], "unit": "%", "tier_values": {}},
+  "优越代码伤害": {"aliases": ["优越代码", "优越属性伤害", "元素伤害", "屬性傷害"], "unit": "%", "tier_values": {}},
+  "最大装弹数": {"aliases": ["最大弹数", "最大裝彈數", "弹数"], "unit": "%", "tier_values": {}},
+  "命中率": {"aliases": ["命中", "命中率增加"], "unit": "%", "tier_values": {}},
+  "暴击率": {"aliases": ["暴击", "爆击率", "暴擊率"], "unit": "%", "tier_values": {}},
+  "暴击伤害": {"aliases": ["暴伤", "爆击伤害", "暴擊傷害"], "unit": "%", "tier_values": {}},
+  "蓄力速度": {"aliases": ["蓄速", "蓄力速度增加"], "unit": "%", "tier_values": {}},
+  "蓄力伤害": {"aliases": ["蓄力伤害增加", "蓄力傷害"], "unit": "%", "tier_values": {}}
+}

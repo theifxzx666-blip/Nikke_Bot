@@ -10,12 +10,17 @@ from __future__ import annotations
 import io
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
-GAMEKEE_CACHE_DIR = Path(r"F:\Codex\Nikke\Nikke_Wiki\cache\gamekee_content_details")
+# 可被环境变量 NIKKE_WIKI_CACHE_DIR 覆盖（便携版使用），默认指向本机 Nikke_Wiki
+GAMEKEE_CACHE_DIR = Path(
+    os.environ.get("NIKKE_WIKI_CACHE_DIR")
+    or r"F:\Codex\Nikke\Nikke_Wiki\cache\gamekee_content_details"
+)
 
 
 def _load_content_rows(content_id: int | None) -> list[list[dict[str, Any]]] | None:

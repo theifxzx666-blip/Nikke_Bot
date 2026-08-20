@@ -60,6 +60,12 @@ $Script:OneBotWs = "ws://127.0.0.1:$($Script:PortOneBot)/ws"
 # 启动时用到的环境变量(桥接/后台默认端口)
 $env:PYTHONPATH = $Script:ProjectRoot
 
+# 便携版支持：项目内存在 wiki_data/wiki_cache 时优先使用（移动整个文件夹即可换数据源）
+$Script:WikiDataDir = Join-Path $Script:ProjectRoot "wiki_data"
+if (Test-Path -LiteralPath $Script:WikiDataDir) { $env:NIKKE_WIKI_DATA_DIR = $Script:WikiDataDir }
+$Script:WikiCacheDir = Join-Path $Script:ProjectRoot "wiki_cache"
+if (Test-Path -LiteralPath $Script:WikiCacheDir) { $env:NIKKE_WIKI_CACHE_DIR = $Script:WikiCacheDir }
+
 $Host.UI.RawUI.WindowTitle = "NIKKE QQ Bot 控制台"
 
 # ---------- 工具函数 ----------
@@ -343,21 +349,54 @@ function Start-NapCat {
         Write-Host "OK    NapCat 已在运行"
         return
     }
-    $napcat = Find-NapCatExe
-    if (-not $napcat) {
-        Write-Host "WARN  未找到 NapCatWinBootMain.exe" -ForegroundColor Yellow
-        return
+    $napcatDir = Join-Path $Script:SupportsDir "NapCat.Shell.Windows.OneKey"
+    $launcher = Join-Path $napcatDir "launcher-win10.bat"
+    if (Test-Path -LiteralPath $launcher) {
+        Write-Host "START NapCat 使用 launcher-win10.bat："
+        Write-Host "      $launcher"
+        Write-Host "      如弹出管理员授权请点“是”；QQ 登录窗口出现后请扫码。"
+        Start-Process -FilePath $launcher -WorkingDirectory $napcatDir | Out-Null
+        Start-QrCodeWatch
+    } else {
+        $napcat = Find-NapCatExe
+        if (-not $napcat) {
+            Write-Host "WARN  未找到 NapCatWinBootMain.exe" -ForegroundColor Yellow
+            return
+        }
+        Start-Process -FilePath $napcat -WorkingDirectory (Split-Path -Parent $napcat) | Out-Null
+        Write-Host "START NapCat: $napcat"
     }
-    Start-Process -FilePath $napcat -WorkingDirectory (Split-Path -Parent $napcat) | Out-Null
-    Write-Host "START NapCat: $napcat"
     if (-not (Test-PortListening $Script:PortNapCat)) {
-        [void](Wait-Port $Script:PortNapCat 15)
+        [void](Wait-Port $Script:PortNapCat 25)
     }
     if (Test-PortListening $Script:PortNapCat) {
         Write-Host "OK    NapCat WebUI: $Script:UrlNapCat"
     } else {
         Write-Host "WARN  NapCat WebUI 未就绪，可能还在启动" -ForegroundColor Yellow
     }
+}
+
+function Start-QrCodeWatch {
+    # 后台监控 NapCat 登录二维码：cache\qrcode.png 更新时自动打开，方便手机扫码
+    if ($Mode -eq "fg") { return }
+    $watchPy = Join-Path $Script:ScriptDir "qrcode_watch.py"
+    if (-not (Test-Path -LiteralPath $watchPy)) {
+        Write-Host "WARN  未找到二维码监控脚本: $watchPy" -ForegroundColor Yellow
+        return
+    }
+    $pythonParts = @(Find-PythonExe)
+    if (-not $pythonParts) {
+        Write-Host "WARN  Python 未找到，跳过二维码监控" -ForegroundColor Yellow
+        return
+    }
+    $exe = $pythonParts[0]
+    $args = @()
+    if ($pythonParts.Count -gt 1) {
+        $args += $pythonParts[1..($pythonParts.Count - 1)]
+    }
+    $args += @($watchPy)
+    Start-Process -FilePath $exe -ArgumentList $args -WorkingDirectory $Script:ScriptDir -WindowStyle Hidden | Out-Null
+    Write-Host "START 二维码监控（qrcode.png 刷新时自动打开）"
 }
 
 function Start-TextProxy {
@@ -399,9 +438,15 @@ function Start-AstrBot {
         Write-Host "OK    AstrBot WebUI 已在运行: $Script:UrlAstrBot"
         return
     }
-    if (-not (Test-Path -LiteralPath $Script:AstrBotExe)) {
-        Write-Host "WARN  未找到 AstrBot: $Script:AstrBotExe" -ForegroundColor Yellow
-        Write-Host "      尝试 uvx 启动需要网络与 uv。"
+    # 优先便携版 .venv 内的 astrbot，其次独立的 astrbot-uv-env
+    $astrbotExe = $Script:AstrBotExe
+    $venvAstrbot = Join-Path $Script:ProjectRoot ".venv\Scripts\astrbot.exe"
+    if (Test-Path -LiteralPath $venvAstrbot) {
+        $astrbotExe = $venvAstrbot
+    }
+    if (-not (Test-Path -LiteralPath $astrbotExe)) {
+        Write-Host "WARN  未找到 AstrBot: $astrbotExe" -ForegroundColor Yellow
+        Write-Host "      请先执行 setup.bat 安装依赖（便携版）或安装 AstrBot。"
         return
     }
     $logOut = Get-LogFilePath "astrbot"
@@ -409,11 +454,11 @@ function Start-AstrBot {
     if ($Mode -eq "fg") {
         $psArgs = @(
             "-NoExit", "-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass",
-            "-Command", "& { `$env:PYTHONUTF8='1'; & '$Script:AstrBotExe' run -p $($Script:PortAstrBot) }"
+            "-Command", "& { `$env:PYTHONUTF8='1'; & '$astrbotExe' run -p $($Script:PortAstrBot) }"
         )
         Start-Process -FilePath "powershell.exe" -ArgumentList $psArgs -WorkingDirectory $Script:AstrBotDir -WindowStyle Normal | Out-Null
     } else {
-        Start-Process -FilePath $Script:AstrBotExe -ArgumentList @("run", "-p", "$($Script:PortAstrBot)") -WorkingDirectory $Script:AstrBotDir -WindowStyle Hidden -RedirectStandardOutput $logOut -RedirectStandardError $logErr | Out-Null
+        Start-Process -FilePath $astrbotExe -ArgumentList @("run", "-p", "$($Script:PortAstrBot)") -WorkingDirectory $Script:AstrBotDir -WindowStyle Hidden -RedirectStandardOutput $logOut -RedirectStandardError $logErr | Out-Null
     }
     Write-Host "START AstrBot (日志: $logOut)"
     if (-not (Test-PortListening $Script:PortAstrBot)) {
@@ -498,20 +543,49 @@ function Start-Admin {
     }
 }
 
+function Start-Watchdog {
+    # 链路守护：掉线检测 / 自动重连 / 钉钉告警（pythonw 后台无窗口运行）
+    $watchPy = Join-Path $Script:ProjectRoot "watchdog.py"
+    if (-not (Test-Path -LiteralPath $watchPy)) {
+        Write-Host "WARN  未找到 watchdog: $watchPy" -ForegroundColor Yellow
+        return
+    }
+    try {
+        $procs = Get-CimInstance Win32_Process -Filter "Name='pythonw.exe' OR Name='python.exe'" -ErrorAction SilentlyContinue
+        if ($procs | Where-Object { $_.CommandLine -and $_.CommandLine.Contains("watchdog.py") }) {
+            Write-Host "OK    watchdog 已在运行"
+            return
+        }
+    } catch {
+    }
+    $pythonw = Join-Path $Script:ProjectRoot ".venv\Scripts\pythonw.exe"
+    if (-not (Test-Path -LiteralPath $pythonw)) {
+        Write-Host "WARN  未找到 pythonw.exe: $pythonw" -ForegroundColor Yellow
+        return
+    }
+    Start-Process -FilePath $pythonw -ArgumentList $watchPy -WorkingDirectory $Script:ProjectRoot -WindowStyle Hidden | Out-Null
+    Write-Host "START watchdog（后台守护，日志: $(Join-Path $Script:ProjectRoot 'watchdog.log')）"
+}
+
 function Invoke-Start {
     Write-Step "一键启动 (模式: $Mode)"
     Write-LogLine "=== 启动流程开始 (mode=$Mode) ==="
-    Start-OllamaCheck
-    Write-Step "1/4 启动 NapCat"
+    Write-Step "1/5 启动 NapCat（launcher-win10，扫码登录）"
     Start-NapCat
-    Write-Step "2/4 启动 AstrBot 与文本代理"
-    Start-TextProxy
+    Write-Step "2/5 启动 AstrBot"
     Start-AstrBot
-    Write-Step "3/4 启动会战本地服务"
+    Write-Step "3/5 启动会战本地服务"
     Start-Bridge
     Start-Admin
-    Write-Step "4/4 健康检查"
+    Write-Step "4/5 启动链路守护 watchdog"
+    Start-Watchdog
+    Write-Step "5/5 健康检查"
     Invoke-Health
+    Write-Host ""
+    Write-Host "自动打开管理后台：AstrBot / 成员后台 / 桥接健康页"
+    Open-Url $Script:UrlAstrBot
+    Open-Url $Script:UrlAdmin
+    Open-Url "$Script:UrlBridge/health"
     Write-LogLine "=== 启动流程结束 ==="
 }
 
@@ -553,16 +627,13 @@ function Invoke-Health {
     Write-Host "[端口状态]"
     Write-PortStatus $Script:PortAstrBot "AstrBot WebUI"
     Write-PortStatus $Script:PortOneBot "OneBot 反向 WS"
-    Write-PortStatus $Script:PortTextProxy "本地模型代理"
     Write-PortStatus $Script:PortNapCat "NapCat WebUI"
     Write-PortStatus $Script:PortBridge "会战桥接服务"
     Write-PortStatus $Script:PortAdmin "成员后台"
-    Write-PortStatus $Script:PortOllama "Ollama"
 
     Write-Host ""
     Write-Host "[进程状态]"
     Write-ProcessStatus "NapCatWinBootMain.exe" "NapCat"
-    Write-ProcessStatus "ollama.exe" "Ollama"
 
     Write-Host ""
     Write-Host "[桥接服务健康检查]"

@@ -34,6 +34,7 @@ QQ 小号
 
 - `start-nikke-qq-bot-menu.bat`：根目录日常入口，双击进入中文菜单。优先走 `launcher\menu.bat`，不存在时回退旧菜单 `qq_bot\NIKKE_QQ_BOT_MENU.bat`。
 - `launcher/`：统一启动器。`menu.bat` 交互控制台；`start.bat`（后台隐藏窗口）/`start.bat fg`（前台调试）/`stop.bat`/`restart.bat`/`status.bat`/`admin.bat`/`logs.bat`；核心脚本 `nikke_ctl.ps1`（start/stop/restart/status/logs/admin/menu 子命令）。详情见 `launcher/README.md`。
+- `manager/start-manager.bat`：Windows 图形管理客户端入口；默认使用 pywebview/WebView2，管理页面监听 `127.0.0.1:8899`。详情见 `manager/README.md`。
 - `qq_bot/NIKKE_QQ_BOT_MENU.ps1`：旧版总控菜单，作为兼容保留，新功能优先加到 `launcher/nikke_ctl.ps1`。
 - `supports/AstrBot/start-astrbot.bat`：AstrBot WebUI 和本地模型代理启动入口（launcher 后台模式直接调用 astrbot.exe，不再经此 bat）。
 - `qq_bot/02-start-qq-bot.bat`：启动会战桥接服务和成员后台（旧入口，launcher 后台模式已覆盖此能力）。
@@ -45,6 +46,7 @@ QQ 小号
 
 - `guild_war_bot/`：会战机器人业务逻辑、skills、SQLite 访问和 HTTP 桥接。
 - `launcher/`：统一一键启动器（menu/start/stop/restart/status/admin/logs），后台模式日志进 `data/logs/`。
+- `manager/`：图形管理客户端；只使用 Python 标准库 HTTP 服务和 pywebview，不引入第三方 Web 框架或前端构建链。
 - `Skills/`：当前机器人已有能力的维护型 skill 清单，便于后续扩展和交接。
 - `qq_bot/`：启动菜单、AstrBot 插件模板、旧 OneBot 回退入口。
 - `data/`：SQLite、配置、OCR tessdata、轻量模板、集中日志（`data/logs/`）。
@@ -117,3 +119,65 @@ $env:PYTHONPATH='F:\Codex\Nikke\Nikke_Bot'; py -3 -c "import guild_war_bot.servi
 Invoke-RestMethod http://127.0.0.1:11434/api/tags
 Invoke-RestMethod http://127.0.0.1:8793/health
 ```
+
+## 装备词条统计
+
+词条功能只扩展 `astrbot_plugin_nikke_guild_bridge`，不修改 AstrBot 核心，也不把业务逻辑写进会战 `8793` 服务：
+
+- 存储：`guild_war_bot/wiki_query/equipment_store.py`
+- 会话：`guild_war_bot/wiki_query/equipment_session.py`
+- OCR：`guild_war_bot/wiki_query/ocr.py`
+- 卡片/对比/Excel：`guild_war_bot/wiki_query/catalog.py`
+- AstrBot 路由：`qq_bot/astrbot_plugin_nikke_guild_bridge/main.py`
+- 词条规则：`data/equipment_affix_catalog.json`
+- 角色槽位：`data/character_equip_catalog.json`
+- 模板与样本说明：`assets/equip_templates/README.md`
+- 完整方案：`docs/词条统计功能实施方案.md`
+
+命令支持半角/全角 `#`、`/` 前缀：`#词条导入 角色名`、`#词条导入 角色名 5`、`#词条 角色名`、`#词条统计 角色名或属性`、`#词条导出`、`#词条确认`、`#词条修正`、`#词条重试`、`#词条取消`。默认按 4 个装备槽位导入，只有角色配置或命令明确指定时使用 5 槽。
+
+会话状态为 `IDLE -> WAITING_SCREENSHOT_N -> WAITING_CONFIRM -> COMPLETE`，30 分钟无交互清理；内存状态同时持久化到 SQLite。运行数据库固定使用 `StarTools.get_data_dir("astrbot_plugin_nikke_guild_bridge")/equipment_affix.db`，归档原图放在同一插件数据目录的 `imports/YYYYMMDD/<sha256>.<ext>`，不要写入会战库 `data/guild_war.db`。
+
+消息入口必须在 5 秒内 ACK。OCR 全局最多 2 张/秒，同一 QQ 串行；RapidOCR、PIL 渲染和 Excel 导出使用后台任务/`asyncio.to_thread()`，后台不得保存整个 `AstrMessageEvent`。插件卸载时必须取消清理任务和后台任务。
+
+词条阶数范围是 `0-15`，其中 `0` 代表待人工确认。`tier_values` 只有获得真实截图和可靠标定后才能填写，禁止恢复早期未经实测的 `tier_ranges`。当前 `assets/equip_templates/` 没有真实脱敏模板，QQ 压缩、反光和 UI 变化下的识别率尚未验收；离线测试通过不等于群内链路和识别率通过。
+
+AstrBot 独立运行环境必须安装 `rapidocr-onnxruntime`。源码插件修改后，只同步插件源码到 `supports/AstrBot/data/plugins/astrbot_plugin_nikke_guild_bridge/`，不要覆盖 `supports/AstrBot/data/cmd_config.json` 或插件运行数据。验证命令：
+
+```powershell
+cd F:\Codex\Nikke\Nikke_Bot
+py -3 -m pytest tests
+py -3 -m compileall guild_war_bot qq_bot\astrbot_plugin_nikke_guild_bridge
+$env:PYTHONPATH='F:\Codex\Nikke\Nikke_Bot'
+& '.\supports\astrbot-uv-env\Scripts\python.exe' -c "import rapidocr_onnxruntime; import qq_bot.astrbot_plugin_nikke_guild_bridge.main; print('ok')"
+```
+
+2026-08-19 离线结果：`63 passed, 3 skipped`；AstrBot 环境插件导入和 RapidOCR 空白图冒烟通过。真实群聊/私聊图片、卡片和 Excel 发送仍需重载插件后在 QQ 链路验收。
+
+## 图形管理客户端
+
+主要文件：`manager/manager.py`、`manager/web/index.html`、`manager/web/style.css`、`manager/web/app.js`、`manager/start-manager.bat`。默认地址为 `http://127.0.0.1:8899`；占用时自动在后续 10 个端口中选择可用端口。调试也可临时设置 `NIKKE_MANAGER_PORT`。
+
+客户端负责 AstrBot、NapCat、会战桥接、成员后台的启停与就绪等待；OneBot 6199 只做 Established 链路检测，故障归因到 NapCat，不提供独立启停。停止桥接/后台必须按监听端口找 PID，禁止杀全部 `python.exe`。用户手动停止服务后，本次客户端会话内暂停对应守护；手动启动或重启后恢复守护，避免刚停止就被自动拉起。
+
+`manager/manager_config.json` 是本机运行配置，可能包含钉钉 webhook/secret，已加入 `.gitignore`；不要提交、复制到文档或写入测试输出。背景图片目录 `manager/manager_bg/` 同样忽略。配置写入使用临时文件替换，导入必须通过结构校验。
+
+技能开关不是装饰状态：AstrBot 插件初始化时读取 `manager/manager_config.json` 中 `enabled=false` 的命令前缀，词条入口和会战/Wiki 桥接入口命中后拒绝执行。修改技能开关后需重载 `astrbot_plugin_nikke_guild_bridge` 或重启 AstrBot；新增技能只登记管理信息，不会自动生成对应业务实现。
+
+管理器默认启动守护线程。只调试页面/API且不得启动机器人服务时使用：
+
+```powershell
+cd F:\Codex\Nikke\Nikke_Bot
+$env:NIKKE_MANAGER_PORT=8900
+& .\.venv\Scripts\python.exe .\manager\manager.py --no-webview --no-daemon
+```
+
+验证命令：
+
+```powershell
+& .\.venv\Scripts\python.exe -m pytest tests\test_manager.py
+& .\.venv\Scripts\python.exe -m pytest tests
+& .\.venv\Scripts\python.exe -m compileall manager
+```
+
+2026-08-20 验证结果：管理器测试 `6 passed`；全量 `69 passed, 3 skipped`。桌面总览、技能弹窗、运维表格和 `760x900` 窄屏布局已通过本地浏览器检查，无横向溢出；原有 `8899` 管理器实例未被终止，新版使用 `8900` 隔离验证。PyInstaller `6.22.2` 已生成 `manager/NIKKE_Manager.exe`，并用 `--no-webview --no-daemon` 完成页面和 API 冒烟；当 `8899`、`8900` 已占用时，最终 EXE 已验证会自动顺延到 `8901`。

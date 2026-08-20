@@ -28,6 +28,7 @@ AstrBot 插件按官方结构维护：`metadata.yaml` + `main.py` + `_conf_schem
 | 后台页面 | `launcher\admin.bat` |
 | 集中日志 | `launcher\logs.bat` → `data\logs\` |
 | 交互控制台 | `launcher\menu.bat` |
+| 图形管理客户端 | `manager\start-manager.bat` |
 
 > launcher 后台模式：服务窗口隐藏，输出进 `data/logs/`；NapCat 因需 QQ 扫码登录保持可见窗口。旧 `qq_bot\NIKKE_QQ_BOT_MENU.ps1` 菜单保留作兼容。
 
@@ -42,6 +43,7 @@ AstrBot 插件按官方结构维护：`metadata.yaml` + `main.py` + `_conf_schem
 | 成员后台 | `http://127.0.0.1:8788` |
 | Ollama | `http://127.0.0.1:11434` |
 | AstrBot 文本代理 | `http://127.0.0.1:11435/v1` |
+| 机器人管理客户端 | `http://127.0.0.1:8899` |
 
 ## 目录结构
 
@@ -49,6 +51,7 @@ AstrBot 插件按官方结构维护：`metadata.yaml` + `main.py` + `_conf_schem
 | --- | --- |
 | `start-nikke-qq-bot-menu.bat` | 根目录启动入口，双击进入中文菜单（优先 launcher） |
 | `launcher/` | 统一启动器：一键启动/停止/重启/状态/后台/日志 |
+| `manager/` | pywebview 图形管理客户端、本地 HTTP API、守护监控和配置 |
 | `qq_bot/` | QQ/AstrBot 启动菜单、桥接插件模板、安装脚本 |
 | `guild_war_bot/` | 会战机器人业务逻辑、成员库、skills |
 | `Skills/` | 机器人能力说明和后续维护 skill |

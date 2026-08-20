@@ -45,6 +45,15 @@ Desktop.ini
 # ===== 其他 =====
 *.log
 
+# ===== 管理客户端本机配置（含钉钉密钥和背景图）=====
+manager/manager_config.json
+manager/manager_bg/
+manager/build/
+manager/dist/
+manager/*.spec
+manager/NIKKE_Manager.exe
+watchdog_config.json
+
 # ===== 临时诊断文件（勿提交）=====
 data/*.tmp
 data/napcat_*.txt
@@ -85,3 +94,18 @@ data/_ocr_work/
 data/_probe.py
 data/_alias_check.py
 data/*_reload.txt
+
+# ===== 管理客户端构建中间产物 / 运行日志 =====
+manager/build_tmp*/
+manager/dist_tmp*/
+manager/build/
+manager/dist/
+manager/manager.log
+manager/manager_logs/
+manager/manager_bg/
+
+# ===== 会战桥接本机配置（含 token/secret，不提交）=====
+data/cmd_config.json
+
+# ===== 脚本备份（.bak-日期 后缀）=====
+*.bak-*
